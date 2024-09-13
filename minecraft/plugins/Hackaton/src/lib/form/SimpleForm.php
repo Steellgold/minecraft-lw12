@@ -69,14 +69,13 @@ abstract class SimpleForm extends Form {
 
     /**
      * @param string $text
-     * @param string|null $flag
      * @param int $imageType
      * @param string $imagePath
      * @param $label
      * @return void
      */
-    public function addButton(string $text, ?string $flag = null, int $imageType = -1, string $imagePath = "", $label = null): void {
-        $content = ["text" => ($flag ?? "") . $text];
+    public function addButton(string $text, int $imageType = -1, string $imagePath = "", $label = null): void {
+        $content = ["text" => $text];
         if ($imageType !== -1) {
             $content["image"]["type"] = $imageType === self::IMAGE_TYPE_PATH ? "path" : "url";
             $content["image"]["data"] = $imagePath;

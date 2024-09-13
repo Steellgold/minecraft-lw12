@@ -16,6 +16,7 @@ class WaitingGameTask extends GameTask {
         parent::onRun();
         if ($this->getGame()->getMode() === Game::MODE_WAITING) {
             (new GameWaitingEvent($this->getGame(), $this->getTime()))->call();
+            $this->getGame()->sendMessages("Waiting for players... (" .  $this->getTime() . ")");
             // TODO: Check if the game is full and start it
             // $this->getGame()->setMode(Game::MODE_STARTING);
             // new GameStartingTask($this->getGame());

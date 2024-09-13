@@ -23,14 +23,22 @@ class Team {
 
     /**
      * @param int $type
+     * @param string $name
      */
-    public function __construct(private readonly int $type) { }
+    public function __construct(private readonly int $type, private readonly string $name) { }
 
     /**
      * @return int
      */
     public function getType(): int {
         return $this->type;
+    }
+
+    /**
+     * @return string
+     */
+    public function getName(): string {
+        return $this->name;
     }
 
     /**

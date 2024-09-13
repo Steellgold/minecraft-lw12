@@ -4,6 +4,7 @@ namespace hackaton\form\lobby;
 
 use hackaton\GAPlayer;
 use hackaton\lib\form\SimpleForm;
+use hackaton\Loader;
 
 class ChoseGameForm extends SimpleForm {
 
@@ -14,8 +15,8 @@ class ChoseGameForm extends SimpleForm {
     protected function create(GAPlayer $player): void {
         $this->setTitle("Chose a game");
         $this->setContent("Chose a game to play");
-        $this->addButton("Laser Game");
-        $this->addButton("Bed Wars");
+        $this->addButton("Laser Game", -1, "", "laser-game");
+        // $this->addButton("Bed Wars");
     }
 
     /**
@@ -24,6 +25,15 @@ class ChoseGameForm extends SimpleForm {
      * @return void
      */
     protected function handle(GAPlayer $player, $data): void {
-        // TODO: Implement handle() method.
+        $player->sendMessage(Loader::PREFIX . "Creating game...");
+        $config = match ($data) {
+            "laser-game" => Loader::getInstance()->getLaserGameConfig(),
+            // 1 => "bed-wars.yml",
+            default => null
+        };
+
+        if (is_null($config)) return;
+
+        $player->joinGame($config);
     }
 }

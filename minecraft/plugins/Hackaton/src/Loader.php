@@ -8,9 +8,13 @@ use hackaton\lib\GameLib;
 use hackaton\listener\PlayerListener;
 use hackaton\manager\ItemManager;
 use pocketmine\plugin\PluginBase;
+use pocketmine\utils\Config;
 use pocketmine\utils\TextFormat as TF;
 
 class Loader extends PluginBase {
+
+    /** @var string */
+    public const PREFIX = TF::DARK_GREEN . "[" . TF::GREEN . "Hackaton" . TF::DARK_GREEN . "] " . TF::WHITE;
 
     /** @var Loader */
     private static Loader $instance;
@@ -82,6 +86,13 @@ class Loader extends PluginBase {
      */
     public function getGames(): array {
         return $this->games;
+    }
+
+    /**
+     * @return Config
+     */
+    public function getLaserGameConfig(): Config {
+        return new Config($this->getDataFolder() . "laser-game.yml", Config::YAML);
     }
 
     /**
