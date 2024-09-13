@@ -66,11 +66,10 @@ abstract class Form implements IForm {
     }
 
     /**
-     * @param Form $form
      * @param GAPlayer $player
      * @return void
      */
-    abstract protected function create(Form $form, GAPlayer $player): void;
+    abstract protected function create(GAPlayer $player): void;
 
     /**
      * @param GAPlayer $player

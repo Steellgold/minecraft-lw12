@@ -3,16 +3,31 @@
 namespace hackaton;
 
 use hackaton\game\Game;
+use hackaton\lib\customies\Customies;
+use hackaton\lib\GameLib;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\TextFormat as TF;
 
 class Loader extends PluginBase {
 
-    /** @var Loader  */
-    public static Loader $instance;
+    /** @var Loader */
+    private static Loader $instance;
+
+    /** @var GameLib[] */
+    private array $libs = [];
 
     /** @var Game[] */
     private array $games = [];
+
+    /**
+     * @return void
+     */
+    protected function onLoad(): void {
+        self::$instance = $this;
+
+        // Register libs
+        $this->registerLib(new Customies());
+    }
 
     /**
      * @return void
@@ -28,6 +43,23 @@ class Loader extends PluginBase {
             "\n";
 
         $this->getLogger()->info($title);
+
+        $this->loadLibs();
+    }
+
+    /**
+     * @param GameLib $lib
+     * @return void
+     */
+    private function registerLib(GameLib $lib): void {
+        $this->libs[] = $lib;
+    }
+
+    /**
+     * @return void
+     */
+    private function loadLibs(): void {
+        foreach ($this->libs as $lib) $lib->onEnable($this);
     }
 
     /**
