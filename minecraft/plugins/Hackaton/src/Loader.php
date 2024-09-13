@@ -5,6 +5,8 @@ namespace hackaton;
 use hackaton\game\Game;
 use hackaton\lib\customies\Customies;
 use hackaton\lib\GameLib;
+use hackaton\listener\PlayerListener;
+use hackaton\manager\ItemManager;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\TextFormat as TF;
 
@@ -27,6 +29,9 @@ class Loader extends PluginBase {
 
         // Register libs
         $this->registerLib(new Customies());
+
+        // Save config
+        $this->saveResource("laser-game.yml", true);
     }
 
     /**
@@ -45,6 +50,9 @@ class Loader extends PluginBase {
         $this->getLogger()->info($title);
 
         $this->loadLibs();
+        $this->loadListeners();
+
+        ItemManager::getInstance()->initialize();
     }
 
     /**
@@ -60,6 +68,13 @@ class Loader extends PluginBase {
      */
     private function loadLibs(): void {
         foreach ($this->libs as $lib) $lib->onEnable($this);
+    }
+
+    /**
+     * @return void
+     */
+    private function loadListeners(): void {
+        new PlayerListener();
     }
 
     /**

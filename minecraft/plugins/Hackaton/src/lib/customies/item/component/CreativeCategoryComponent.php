@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace wapy\libs\customiesdevs\customies\item\component;
+namespace hackaton\lib\customies\item\component;
 
 use hackaton\lib\customies\item\CreativeInventoryInfo;
 

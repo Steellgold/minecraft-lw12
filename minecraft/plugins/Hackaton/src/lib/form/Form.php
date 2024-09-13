@@ -1,6 +1,6 @@
 <?php
 
-namespace hackaton\lib;
+namespace hackaton\lib\form;
 
 use Closure;
 use hackaton\GAPlayer;
@@ -60,7 +60,7 @@ abstract class Form implements IForm {
      * @return void
      */
     private function send(GAPlayer $player): void {
-        $this->create($this, $player);
+        $this->create($player);
         $this->setCallback($this->createHandler($player, $this->data));
         $player->sendForm($this);
     }

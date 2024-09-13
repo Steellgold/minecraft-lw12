@@ -1,0 +1,30 @@
+{
+    "format_version": 2,
+    "header": {
+        "description": "Supabase Hackaton launch week 12",
+        "name": "Supabase Hackaton",
+        "uuid": "dcd4a11c-8143-4047-b324-0fc681bced33",
+        "version": [
+            1,
+            0,
+            0
+        ],
+        "min_engine_version": [
+            1,
+            18,
+            2
+        ]
+    },
+    "modules": [
+        {
+            "type": "resources",
+            "uuid": "0127661b-0d96-4dbe-a3bf-58dae5f419ed",
+            "description": "Official texture pack of Wapy",
+            "version": [
+                1,
+                0,
+                0
+            ]
+        }
+    ]
+}

@@ -1,9 +1,9 @@
 <?php
 
-namespace hackaton\form;
+namespace hackaton\form\lobby;
 
 use hackaton\GAPlayer;
-use hackaton\lib\SimpleForm;
+use hackaton\lib\form\SimpleForm;
 
 class ChoseGameForm extends SimpleForm {
 
@@ -14,9 +14,8 @@ class ChoseGameForm extends SimpleForm {
     protected function create(GAPlayer $player): void {
         $this->setTitle("Chose a game");
         $this->setContent("Chose a game to play");
-        $this->addButton("Game 1");
-        $this->addButton("Game 2");
-        $this->addButton("Game 3");
+        $this->addButton("Laser Game");
+        $this->addButton("Bed Wars");
     }
 
     /**

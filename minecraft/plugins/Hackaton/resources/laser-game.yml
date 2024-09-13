@@ -1,0 +1,17 @@
+name: Laser Game
+description: "Attack your enemies with a laser gun!"
+
+max_players: 10
+min_players: 2
+game_duration: 300 # 5 minutes
+
+arena:
+  map: Labyrinth
+
+spawn_points:
+  - x: 0
+    y: 0
+    z: 0
+  - x: 150
+    y: 0
+    z: 150

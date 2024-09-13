@@ -1,6 +1,6 @@
 <?php
 
-namespace hackaton\lib;
+namespace hackaton\lib\form;
 
 use hackaton\GAPlayer;
 
