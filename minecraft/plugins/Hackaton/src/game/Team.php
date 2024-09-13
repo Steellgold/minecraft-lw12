@@ -2,19 +2,24 @@
 
 namespace hackaton\game;
 
+use hackaton\GAPlayer;
+
 class Team {
 
     /** @var int */
-    public const TYPE_SOLO = 0;
+    public const TYPE_SOLO = 1;
 
     /** @var int */
-    public const TYPE_DUO = 1;
+    public const TYPE_DUO = 2;
 
     /** @var int */
-    public const TYPE_TRIO = 2;
+    public const TYPE_TRIO = 3;
 
     /** @var int */
-    public const TYPE_SQUAD = 3;
+    public const TYPE_SQUAD = 4;
+
+    /** @var GAPlayer[] */
+    private array $players = [];
 
     /**
      * @param int $type
@@ -26,5 +31,40 @@ class Team {
      */
     public function getType(): int {
         return $this->type;
+    }
+
+    /**
+     * @return array
+     */
+    public function getPlayers(): array {
+        return $this->players;
+    }
+
+    /**
+     * @param GAPlayer $player
+     * @return void
+     */
+    public function addPlayer(GAPlayer $player): void {
+        $this->players[] = $player;
+    }
+
+    /**
+     * @return int
+     */
+    public function getPlayerCount(): int {
+        return count($this->players);
+    }
+
+    /**
+     * @return int
+     */
+    public function getMaximumPlayers(): int {
+        return match ($this->type) {
+            self::TYPE_SOLO => 1,
+            self::TYPE_DUO => 2,
+            self::TYPE_TRIO => 3,
+            self::TYPE_SQUAD => 4,
+            default => 0
+        };
     }
 }

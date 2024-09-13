@@ -31,6 +31,13 @@ class Loader extends PluginBase {
     }
 
     /**
+     * @return Game[]
+     */
+    public function getGames(): array {
+        return $this->games;
+    }
+
+    /**
      * @return Loader
      */
     public static function getInstance(): Loader {
