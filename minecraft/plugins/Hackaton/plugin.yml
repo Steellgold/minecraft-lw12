@@ -1,0 +1,8 @@
+name: Hackaton
+authors:
+  - RomainSav
+  - Gaëtan
+api: 5.0.0
+version: 1.0.0
+src-namespace-prefix: hackaton
+main: hackaton\Loader
