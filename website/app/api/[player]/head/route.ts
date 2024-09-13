@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db/prisma";
+import { supabase } from "@/lib/db/supabase";
 import { Player } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
@@ -11,7 +12,8 @@ export const GET = async({ url }: NextRequest): Promise<NextResponse> => {
   const data = await prisma.$queryRaw<Player[]>`SELECT * FROM "Player" WHERE name = ${playerName}`;
   if (!data) return NextResponse.json({ error: "Player not found" }, { status: 404 });
 
-  return new NextResponse(data[0].head, { headers: { 'content-type': 'image/png' } });
+  const head = supabase.storage.from("heads").getPublicUrl(playerName + ".png");
+  return NextResponse.json({ url: head?.data.publicUrl });
 }
 
 export const PATCH = async(res: NextRequest): Promise<NextResponse> => {
@@ -31,6 +33,16 @@ export const PATCH = async(res: NextRequest): Promise<NextResponse> => {
     return NextResponse.json({ error: "Invalid body" }, { status: 400 });
   }
 
-  await prisma.$executeRaw`UPDATE "Player" SET head = ${Buffer.from(bodySchema.data.head, "base64")} WHERE name = ${playerName}`;
-  return NextResponse.json({ message: "Head updated" });
+  const fileName = playerName + ".png";
+
+  const head = supabase.storage.from("heads").getPublicUrl(fileName);
+  if (head) {
+    const deleteHead = await supabase.storage.from("heads").remove([fileName]);
+    if (deleteHead.error) return NextResponse.json({ error: "Failed to delete old head" }, { status: 500 });
+  }
+
+  const upload = await supabase.storage.from("heads").upload(fileName, Buffer.from(bodySchema.data.head, "base64"), { contentType: "image/png" });
+  console.log(upload);
+  
+  return NextResponse.json({ success: true });
 }
