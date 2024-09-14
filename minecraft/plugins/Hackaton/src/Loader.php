@@ -31,6 +31,7 @@ class Loader extends PluginBase {
         $this->registerLib(new Customies());
 
         // Save config
+        $this->saveResource("config.yml", true);
         $this->saveResource("laser-game.yml", true);
     }
 

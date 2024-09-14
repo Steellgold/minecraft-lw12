@@ -3,11 +3,19 @@
 namespace hackaton\listener;
 
 use hackaton\game\Game;
+use hackaton\Loader;
+use hackaton\player\formatter\BasicChatFormatter;
+use hackaton\player\formatter\GameChatFormatter;
 use hackaton\player\GAPlayer;
 use pocketmine\event\block\BlockBreakEvent;
 use pocketmine\event\player\PlayerChatEvent;
 use pocketmine\event\player\PlayerCreationEvent;
-use pocketmine\event\player\PlayerMoveEvent;
+use pocketmine\event\player\PlayerDeathEvent;
+use pocketmine\event\player\PlayerJoinEvent;
+use pocketmine\event\player\PlayerQuitEvent;
+use pocketmine\event\player\PlayerRespawnEvent;
+use pocketmine\Server;
+use pocketmine\world\Position;
 
 class PlayerListener extends GameListener {
 
@@ -30,7 +38,7 @@ class PlayerListener extends GameListener {
 
         if (is_null($game)) return;
 
-        if ($game->getMode() === Game::MODE_WAITING ||$game->getMode() === Game::MODE_STARTING) {
+        if ($game->getMode() === Game::MODE_WAITING || $game->getMode() === Game::MODE_STARTING) {
             $event->cancel();
             return;
         }
@@ -43,13 +51,93 @@ class PlayerListener extends GameListener {
     public function onPlayerChat(PlayerChatEvent $event): void {
         /** @var GAPlayer $player */
         $player = $event->getPlayer();
+        $recipients = $event->getRecipients();
         $game = $player->getGame();
 
-        $event->setFormatter($player->getChatFormatter());
+        $event->setFormatter(new BasicChatFormatter());
+
+        if (!is_null($game)) $event->setFormatter(new GameChatFormatter($player));
+
+        foreach ($recipients as $key => $recipient) {
+            if ($recipient instanceof GAPlayer) {
+                if ($recipient->getGame() !== $game) {
+                    unset($recipients[$key]);
+                }
+            }
+        }
+
+        $event->setRecipients($recipients);
+    }
+
+    /**
+     * @param PlayerQuitEvent $event
+     * @return void
+     */
+    public function onPlayerQuit(PlayerQuitEvent $event): void {
+        $event->setQuitMessage("");
+
+        /** @var GAPlayer $player */
+        $player = $event->getPlayer();
+        $game = $player->getGame();
 
         if (is_null($game)) return;
 
-        $event->cancel();
-        $game->broadcastPlayerMessage($event->getFormatter()->format($event->getPlayer()->getName(), $event->getMessage()));
+        $game->quit($player);
+    }
+
+    /**
+     * @param PlayerJoinEvent $event
+     * @return void
+     */
+    public function onPlayerJoin(PlayerJoinEvent $event): void {
+        $event->setJoinMessage("");
+
+        /** @var GAPlayer $player */
+        $player = $event->getPlayer();
+
+        $config = Loader::getInstance()->getConfig();
+
+        $lobbyWorld = Server::getInstance()->getWorldManager()->getWorldByName($config->getNested("lobby.world"));
+        if (is_null($lobbyWorld)) {
+            $player->kick("An error occurred while trying to join the server. Please try again later.");
+            return;
+        }
+
+        $position = new Position(
+            $config->getNested("lobby.spawn.x"),
+            $config->getNested("lobby.spawn.y"),
+            $config->getNested("lobby.spawn.z"),
+            $lobbyWorld
+        );
+        $player->teleport($position);
+    }
+
+    /**
+     * @param PlayerRespawnEvent $event
+     * @return void
+     */
+    public function onPlayerRespawn(PlayerRespawnEvent $event): void {
+        /** @var GAPlayer $player */
+        $player = $event->getPlayer();
+        $game = $player->getGame();
+        if (is_null($game)) return;
+
+        $spawnPoint = $game->getPlayerSpawnPoint($player);
+        if (is_null($spawnPoint)) return;
+
+        $event->setRespawnPosition(new Position($spawnPoint->x, $spawnPoint->y, $spawnPoint->z, $game->getWorld()));
+    }
+
+    /**
+     * @param PlayerDeathEvent $event
+     * @return void
+     */
+    public function onPlayerDeath(PlayerDeathEvent $event): void {
+        /** @var GAPlayer $player */
+        $player = $event->getPlayer();
+        $game = $player->getGame();
+        if (is_null($game)) return;
+
+        $event->setKeepInventory(true);
     }
 }

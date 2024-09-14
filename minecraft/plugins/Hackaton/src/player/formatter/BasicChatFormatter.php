@@ -1,11 +1,11 @@
 <?php
 
-namespace hackaton\player;
+namespace hackaton\player\formatter;
 
 use pocketmine\lang\Translatable;
 use pocketmine\player\chat\ChatFormatter;
 
-class PlayerChatFormatter implements ChatFormatter {
+class BasicChatFormatter implements ChatFormatter {
 
     /**
      * @param string $username

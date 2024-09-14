@@ -1,0 +1,6 @@
+lobby:
+  world: "lobby"
+  spawn:
+    x: 829
+    y: 25
+    z: 211

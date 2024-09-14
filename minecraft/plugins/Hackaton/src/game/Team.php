@@ -24,8 +24,13 @@ class Team {
     /**
      * @param int $type
      * @param string $name
+     * @param string $color
      */
-    public function __construct(private readonly int $type, private readonly string $name) { }
+    public function __construct(
+        private readonly int $type,
+        private readonly string $name,
+        private readonly string $color
+    ) { }
 
     /**
      * @return int
@@ -42,6 +47,13 @@ class Team {
     }
 
     /**
+     * @return string
+     */
+    public function getColor(): string {
+        return $this->color;
+    }
+
+    /**
      * @return array
      */
     public function getPlayers(): array {
@@ -53,7 +65,21 @@ class Team {
      * @return void
      */
     public function addPlayer(GAPlayer $player): void {
-        $this->players[] = $player;
+        $this->players[$player->getUniqueId()->toString()] = $player;
+    }
+
+    /**
+     * @param GAPlayer $player
+     * @return bool
+     */
+    public function removePlayer(GAPlayer $player): bool {
+        $uuid = $player->getUniqueId()->toString();
+        $player = $this->players[$uuid] ?? null;
+
+        if (is_null($player)) return false;
+
+        unset($this->players[$uuid]);
+        return true;
     }
 
     /**

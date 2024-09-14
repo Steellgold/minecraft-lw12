@@ -2,24 +2,25 @@
 
 namespace hackaton\game;
 
+use hackaton\player\GAPlayer;
 use pocketmine\math\Vector3;
 
 class SpawnPoint extends Vector3 {
 
-    /** @var bool */
-    private bool $used = false;
+    /** @var GAPlayer|null */
+    private ?GAPlayer $player = null;
 
     /**
-     * @return bool
+     * @return GAPlayer|null
      */
-    public function isUsed(): bool {
-        return $this->used;
+    public function getPlayer(): ?GAPlayer {
+        return $this->player;
     }
 
     /**
-     * @param bool $used
+     * @param GAPlayer|null $player
      */
-    public function setUsed(bool $used): void {
-        $this->used = $used;
+    public function setPlayer(?GAPlayer $player): void {
+        $this->player = $player;
     }
 }

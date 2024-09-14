@@ -3,14 +3,15 @@
 namespace hackaton\game;
 
 use hackaton\player\GAPlayer;
-use hackaton\player\PlayerChatFormatter;
 use hackaton\task\async\CopyWorldAsync;
 use hackaton\task\WaitingGameTask;
+use pocketmine\block\VanillaBlocks;
 use pocketmine\promise\Promise;
 use pocketmine\promise\PromiseResolver;
 use pocketmine\Server;
 use pocketmine\utils\Config;
 use pocketmine\world\Position;
+use pocketmine\world\sound\Sound;
 use pocketmine\world\World;
 
 class Game {
@@ -40,7 +41,7 @@ class Game {
      * @param int $minPlayers
      * @param int $maxPlayers
      * @param int $duration
-     * @param array $teamNames
+     * @param array $teams
      * @param array $spawnPoints
      * @param World $world
      */
@@ -51,12 +52,12 @@ class Game {
         private readonly int $minPlayers,
         private readonly int $maxPlayers,
         private readonly int $duration,
-        array $teamNames,
+        array $teams,
         private readonly array $spawnPoints,
         private readonly World $world
     ) {
-        foreach ($teamNames as $teamName) {
-            $this->teams[] = new Team(Team::TYPE_SOLO, $teamName);
+        foreach ($teams as $team) {
+            $this->teams[] = new Team(Team::TYPE_SOLO, $team["name"], $team["color"]);
         }
 
         new WaitingGameTask($this);
@@ -178,8 +179,26 @@ class Game {
      * @return SpawnPoint[]
      */
     public function getSpawnPoints(): array {
+        return $this->spawnPoints;
+    }
+
+    /**
+     * @param GAPlayer $player
+     * @return SpawnPoint|null
+     */
+    public function getPlayerSpawnPoint(GAPlayer $player): ?SpawnPoint {
+        foreach ($this->spawnPoints as $spawnPoint) {
+            if ($spawnPoint->getPlayer() === $player) return $spawnPoint;
+        }
+        return null;
+    }
+
+    /**
+     * @return array
+     */
+    public function getUnusedSpawnPoints(): array {
         return array_filter($this->spawnPoints, function(SpawnPoint $spawnPoint) {
-            return !$spawnPoint->isUsed();
+            return is_null($spawnPoint->getPlayer());
         });
     }
 
@@ -194,6 +213,15 @@ class Game {
             }
         }
         return $smallest;
+    }
+
+    public function getTeamByPlayer(GAPlayer $player): ?Team {
+        foreach ($this->teams as $team) {
+            if (in_array($player, $team->getPlayers())) {
+                return $team;
+            }
+        }
+        return null;
     }
 
     /**
@@ -211,18 +239,39 @@ class Game {
         if (!$this->isJoinable()) return false;
 
         $team = $this->getSmallestTeam();
+        if (is_null($team)) return false;
+
         $team->addPlayer($player);
 
-        $spawnPoint = $this->getSpawnPoints()[0];
+        $spawnPoints = $this->getUnusedSpawnPoints();
+        if (empty($spawnPoints)) return false;
+
+        $spawnPoint = $spawnPoints[array_rand($spawnPoints)];
         if (is_null($spawnPoint)) return false;
 
-        $spawnPoint->setUsed(true);
+        $spawnPoint->setPlayer($player);
 
         $player->teleport(new Position($spawnPoint->getX(), $spawnPoint->getY(), $spawnPoint->getZ(), $this->getWorld()));
 
         $this->broadcastMessage("§a{$player->getName()} joined the game (" . $this->getPlayersCount() . "/" . $this->getMaxPlayers() . ")", true);
 
         return true;
+    }
+
+    /**
+     * @param GAPlayer $player
+     * @return void
+     */
+    public function quit(GAPlayer $player): void {
+        foreach ($this->teams as $team) {
+            $success = $team->removePlayer($player);
+            if (!$success) continue;
+
+            $spawnPoint = $this->getPlayerSpawnPoint($player);
+            if (!is_null($spawnPoint)) $spawnPoint->setPlayer(null);
+
+            $this->broadcastMessage("§c{$player->getName()} left the game (" . $this->getPlayersCount() . "/" . $this->getMaxPlayers() . ")", true);
+        }
     }
 
     /**
@@ -237,12 +286,42 @@ class Game {
     }
 
     /**
+     * @param string $title
+     * @param string $subtitle
+     * @return void
+     */
+    public function broadcastTitle(string $title, string $subtitle = ""): void {
+        foreach ($this->teams as $team) {
+            foreach ($team->getPlayers() as $player) $player->sendTitle($title, $subtitle);
+        }
+    }
+
+    /**
+     * @param Sound $sound
+     * @return void
+     */
+    public function broadcastSound(Sound $sound): void {
+        foreach ($this->teams as $team) {
+            foreach ($team->getPlayers() as $player) $player->sendSound($sound);
+        }
+    }
+
+    /**
      * @param string $message
      * @return void
      */
     public function broadcastPlayerMessage(string $message): void {
         foreach ($this->teams as $team) {
             foreach ($team->getPlayers() as $p) $p->sendMessage($message);
+        }
+    }
+
+    /**
+     * @return void
+     */
+    public function start(): void {
+        foreach ($this->getSpawnPoints() as $spawnPoint) {
+            $this->getWorld()->setBlock($spawnPoint->add(0, -1, 0), VanillaBlocks::AIR());
         }
     }
 }

@@ -6,18 +6,23 @@ max_players: 10
 min_players: 2
 game_duration: 300 # 5 minutes
 
-arena:
-  name: Labyrinth
-
 teams:
-  - "Red"
-  - "Blue"
-  - "Green"
-  - "Yellow"
-  - "Purple"
-  - "Orange"
-  - "Pink"
-  - "White"
+  - name: "Red"
+    color: "§c"
+  - name: "Blue"
+    color: "§9"
+  - name: "Green"
+    color: "§a"
+  - name: "Yellow"
+    color: "§e"
+  - name: "Purple"
+    color: "§5"
+  - name: "Orange"
+    color: "§6"
+  - name: "Pink"
+    color: "§d"
+  - name: "White"
+    color: "§f"
 
 spawn_points:
   - x: 10.5

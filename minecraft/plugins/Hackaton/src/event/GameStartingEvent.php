@@ -4,7 +4,7 @@ namespace hackaton\event;
 
 use hackaton\game\Game;
 
-class GameStartEvent extends GameEvent {
+class GameStartingEvent extends GameEvent {
 
     /***
      * @param Game $game
