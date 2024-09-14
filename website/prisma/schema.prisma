@@ -1,0 +1,59 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Player {
+  uuid     String  @id @default(cuid())
+  name     String  @unique
+  head     Bytes
+  score    Score[]
+  games    Game[]
+  isOnline Boolean @default(false)
+}
+
+enum GameStatus {
+  STARTED
+  FINISHED
+}
+
+model Game {
+  id       String @id @default(cuid())
+  simpleId Int    @unique @default(autoincrement())
+
+  startedAt  DateTime?  @default(now())
+  finishedAt DateTime?
+  status     GameStatus
+
+  players Player[]
+  scores  Score[]
+}
+
+enum Team {
+  RED
+  BLUE
+}
+
+model Score {
+  id     String @id @default(cuid())
+  player Player @relation(fields: [playerUuid], references: [uuid])
+  game   Game   @relation(fields: [gameId], references: [id])
+
+  score      Int
+  deathCount Int
+  team       Team @default(RED)
+
+  playerUuid String
+  gameId     String
+}
