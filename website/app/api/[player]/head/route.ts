@@ -9,10 +9,10 @@ export const GET = async({ url }: NextRequest): Promise<NextResponse> => {
   const schema = z.string().safeParse(playerName);
   if (!schema.success) return NextResponse.json({ error: "Invalid player" }, { status: 400 });
 
-  const data = await prisma.$queryRaw<Player[]>`SELECT * FROM "Player" WHERE name = ${playerName}`;
+  const data = await prisma.$queryRaw<Player[]>`SELECT * FROM "Player" WHERE name = ${playerName} OR uuid = ${playerName} LIMIT 1`;
   if (!data) return NextResponse.json({ error: "Player not found" }, { status: 404 });
 
-  const head = supabase.storage.from("heads").getPublicUrl(playerName + ".png");
+  const head = supabase.storage.from("heads").getPublicUrl(data[0].uuid + ".png");
   return NextResponse.json({ url: head?.data.publicUrl });
 }
 
@@ -28,12 +28,9 @@ export const PATCH = async(res: NextRequest): Promise<NextResponse> => {
   if (!data) return NextResponse.json({ error: "Player not found" }, { status: 404 });
 
   const bodySchema = z.object({ head: z.string() }).safeParse(await res.json());
-  if (!bodySchema.success) {
-    console.log(bodySchema.error);
-    return NextResponse.json({ error: "Invalid body" }, { status: 400 });
-  }
+  if (!bodySchema.success) return NextResponse.json({ error: "Invalid body" }, { status: 400 });
 
-  const fileName = playerName + ".png";
+  const fileName = data[0].uuid + ".png";
 
   const head = supabase.storage.from("heads").getPublicUrl(fileName);
   if (head) {
@@ -41,8 +38,6 @@ export const PATCH = async(res: NextRequest): Promise<NextResponse> => {
     if (deleteHead.error) return NextResponse.json({ error: "Failed to delete old head" }, { status: 500 });
   }
 
-  const upload = await supabase.storage.from("heads").upload(fileName, Buffer.from(bodySchema.data.head, "base64"), { contentType: "image/png" });
-  console.log(upload);
-  
+  await supabase.storage.from("heads").upload(fileName, Buffer.from(bodySchema.data.head, "base64"), { contentType: "image/png" });
   return NextResponse.json({ success: true });
 }

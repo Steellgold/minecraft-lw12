@@ -29,9 +29,10 @@ enum GameStatus {
 }
 
 model Game {
-  id         String     @id @default(cuid())
-  name       String     @unique
-  startedAt  DateTime?
+  id       String @id @default(cuid())
+  simpleId Int    @unique @default(autoincrement())
+
+  startedAt  DateTime?  @default(now())
   finishedAt DateTime?
   status     GameStatus
 
@@ -39,11 +40,20 @@ model Game {
   scores  Score[]
 }
 
+enum Team {
+  RED
+  BLUE
+}
+
 model Score {
-  id         String @id @default(cuid())
-  player     Player @relation(fields: [playerUuid], references: [uuid])
-  game       Game   @relation(fields: [gameId], references: [id])
+  id     String @id @default(cuid())
+  player Player @relation(fields: [playerUuid], references: [uuid])
+  game   Game   @relation(fields: [gameId], references: [id])
+
   score      Int
+  deathCount Int
+  team       Team @default(RED)
+
   playerUuid String
   gameId     String
 }

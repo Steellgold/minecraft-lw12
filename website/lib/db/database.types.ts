@@ -76,21 +76,21 @@ export type Database = {
         Row: {
           finishedAt: string | null
           id: string
-          name: string
+          simpleId: number
           startedAt: string | null
           status: Database["public"]["Enums"]["GameStatus"]
         }
         Insert: {
           finishedAt?: string | null
           id: string
-          name: string
+          simpleId?: number
           startedAt?: string | null
           status: Database["public"]["Enums"]["GameStatus"]
         }
         Update: {
           finishedAt?: string | null
           id?: string
-          name?: string
+          simpleId?: number
           startedAt?: string | null
           status?: Database["public"]["Enums"]["GameStatus"]
         }
@@ -119,22 +119,28 @@ export type Database = {
       }
       Score: {
         Row: {
+          deathCount: number
           gameId: string
           id: string
           playerUuid: string
           score: number
+          team: Database["public"]["Enums"]["Team"]
         }
         Insert: {
+          deathCount: number
           gameId: string
           id: string
           playerUuid: string
           score: number
+          team?: Database["public"]["Enums"]["Team"]
         }
         Update: {
+          deathCount?: number
           gameId?: string
           id?: string
           playerUuid?: string
           score?: number
+          team?: Database["public"]["Enums"]["Team"]
         }
         Relationships: [
           {
@@ -162,6 +168,7 @@ export type Database = {
     }
     Enums: {
       GameStatus: "STARTED" | "FINISHED"
+      Team: "RED" | "BLUE"
     }
     CompositeTypes: {
       [_ in never]: never

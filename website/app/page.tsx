@@ -4,69 +4,69 @@ import { OnlineCount } from "@/lib/components/online-count";
 import { Button } from "@/lib/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader } from "@/lib/components/ui/card";
 import { Input } from "@/lib/components/ui/input";
-import { ReactElement, useState } from "react";
+import { ReactElement, useEffect, useState } from "react";
 import { searchAction } from "./actions/player-search";
-import { ArrowLeft, LoaderCircle } from "lucide-react";
+import { LoaderCircle } from "lucide-react";
 import { useFormState, useFormStatus } from "react-dom";
-import { Avatar, AvatarFallback, AvatarImage } from "@/lib/components/ui/avatar";
 import { Alert, AlertDescription, AlertTitle } from "@/lib/components/ui/alert";
+import { PlayerProfile } from "@/lib/components/profile";
 
 const initialState = {
   username: "",
   headUrl: "",
   isOnline: false,
-  error: ""
+  error: "",
+
+  score: 0,
+  deaths: 0,
+  nbrGames: 0,
+
+  games: [],
+};
+
+export type GState = {
+  username: string;
+  headUrl: string;
+  isOnline: boolean;
+  error: string;
+
+  score: number;
+  deaths: number;
+  nbrGames: number;
+
+  games: {
+    gameId: string;
+    simpleId: number;
+    startedAt: string;
+    status: "STARTED" | "FINISHED";
+    players: {
+      uuid: string;
+      username: string;
+      headUrl: string;
+      score: number;
+      deaths: number;
+      team: "RED" | "BLUE";
+    }[];
+  }[];
 };
 
 const Home = () => {
   const [username, setUsername] = useState("");
+  const [reset, setReset] = useState(false);
 
   const sendSearch = searchAction.bind(null, username);
   // @ts-expect-error - React DOM is not typed (i think)
-  const [state, formAction] = useFormState<typeof initialState>(sendSearch, initialState);
+  const [state, formAction] = useFormState<GState>(sendSearch, initialState);
 
-  const reset = () => {
-    setUsername("");
-    formAction();
-  }
+  useEffect(() => {
+    if (state.username) {
+      document.title = `Player - ${state.username}`;
+      setReset(false);
+    }
+  }, [state]);
 
-  if (state.username) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardDescription>
-              <div className="flex items-center gap-2">
-                <Avatar className="rounded-none">
-                  <AvatarImage src={state.headUrl} />                  
-                  <AvatarFallback>{state.username[0].toUpperCase()}</AvatarFallback>
-                </Avatar>
-
-                <div className="flex flex-col">
-                  <h2 className="text-lg font-semibold">{state.username}</h2>
-                  <p className="text-sm text-gray-500">
-                    {state.isOnline
-                      ? <span className="text-primary">Online</span>
-                      : <span className="text-destructive">Offline</span>
-                    }&nbsp;
-                    - Player statistics
-                  </p>
-                </div>
-              </div>
-            </CardDescription>
-          </CardHeader>
-          <CardFooter>
-            <Button onClick={() => {
-              reset();
-              formAction();
-            }} size="sm">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back
-            </Button>
-          </CardFooter>
-        </Card>
-      </div>
-    );
+  if (state.username && !reset) {
+    return <PlayerProfile state={state} onBack={() => setReset(true)} />;
   }
 
   return (
@@ -79,7 +79,12 @@ const Home = () => {
         </CardHeader>
         <form action={formAction}>
           <CardContent className="grid gap-4 -mb-3">
-            <Input type="text" placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} />
+            <Input
+              type="text"
+              placeholder="Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
           </CardContent>
 
           <CardFooter className="flex flex-col gap-4">
@@ -87,9 +92,7 @@ const Home = () => {
 
             {state.error && (
               <Alert variant={state.error ? "destructive" : "default"}>
-                <AlertTitle>
-                  {state.error}
-                </AlertTitle>
+                <AlertTitle>{state.error}</AlertTitle>
                 <AlertDescription>
                   {state.error === "Player not found" && "The player you are looking for does not exist."}
                   {state.error === "Failed to fetch" && "An error occurred while fetching the player."}
@@ -105,7 +108,7 @@ const Home = () => {
       </Card>
     </div>
   );
-}
+};
 
 export default Home;
 
