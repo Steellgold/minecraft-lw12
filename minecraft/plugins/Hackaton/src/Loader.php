@@ -2,7 +2,6 @@
 
 namespace hackaton;
 
-use hackaton\game\Game;
 use hackaton\lib\customies\Customies;
 use hackaton\lib\GameLib;
 use hackaton\listener\PlayerListener;
@@ -21,9 +20,6 @@ class Loader extends PluginBase {
 
     /** @var GameLib[] */
     private array $libs = [];
-
-    /** @var Game[] */
-    private array $games = [];
 
     /**
      * @return void
@@ -82,17 +78,33 @@ class Loader extends PluginBase {
     }
 
     /**
-     * @return Game[]
-     */
-    public function getGames(): array {
-        return $this->games;
-    }
-
-    /**
      * @return Config
      */
     public function getLaserGameConfig(): Config {
         return new Config($this->getDataFolder() . "laser-game.yml", Config::YAML);
+    }
+
+    /**
+     * @param string $path
+     * @return void
+     */
+    private function deleteFolder(string $path): void {
+        $dh = opendir($path);
+
+        while ($file = readdir($dh)) {
+            if ($file === "." || $file === "..") continue;
+            $fullPath = $path . "/" . $file;
+
+            if (is_dir($fullPath)) {
+                $this->deleteFolder($fullPath);
+            } else {
+                @unlink($fullPath);
+            }
+        }
+
+        closedir($dh);
+
+        @rmdir($path);
     }
 
     /**

@@ -3,7 +3,7 @@
 namespace hackaton\lib\form;
 
 use Closure;
-use hackaton\GAPlayer;
+use hackaton\player\GAPlayer;
 use pocketmine\form\Form as IForm;
 use pocketmine\player\Player;
 

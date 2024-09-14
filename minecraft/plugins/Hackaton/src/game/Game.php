@@ -2,8 +2,12 @@
 
 namespace hackaton\game;
 
-use hackaton\GAPlayer;
+use hackaton\player\GAPlayer;
+use hackaton\player\PlayerChatFormatter;
+use hackaton\task\async\CopyWorldAsync;
 use hackaton\task\WaitingGameTask;
+use pocketmine\promise\Promise;
+use pocketmine\promise\PromiseResolver;
 use pocketmine\Server;
 use pocketmine\utils\Config;
 use pocketmine\world\Position;
@@ -31,7 +35,7 @@ class Game {
 
     /**
      * @param string $id
-     * @param string $name
+     * @param string $prefix
      * @param string $description
      * @param int $minPlayers
      * @param int $maxPlayers
@@ -42,7 +46,7 @@ class Game {
      */
     public function __construct(
         private readonly string $id,
-        private readonly string $name,
+        private readonly string $prefix,
         private readonly string $description,
         private readonly int $minPlayers,
         private readonly int $maxPlayers,
@@ -60,22 +64,33 @@ class Game {
 
     /**
      * @param Config $config
-     * @return Game
+     * @return Promise
      */
-    public static function create(Config $config): Game {
-        return new Game(
-            $config->get("id"),
-            $config->get("name"),
-            $config->get("description"),
-            $config->get("min_players"),
-            $config->get("max_players"),
-            $config->get("duration"),
-            $config->get("teams"),
-            array_map(function ($location) {
-                return new SpawnPoint($location["x"], $location["y"], $location["z"]);
-            }, $config->get("spawn_points")),
-            Server::getInstance()->getWorldManager()->getWorldByName($config->getNested("arena.name"))
-        );
+    public static function create(Config $config): Promise {
+        $promiseResolver = new PromiseResolver();
+
+        new CopyWorldAsync($config->get("id"), function (?string $worldName) use ($promiseResolver, $config) {
+            if (is_null($worldName)) {
+                $promiseResolver->resolve(null);
+                return;
+            }
+
+            $promiseResolver->resolve(new Game(
+                $config->get("id"),
+                $config->get("prefix"),
+                $config->get("description"),
+                $config->get("min_players"),
+                $config->get("max_players"),
+                $config->get("duration"),
+                $config->get("teams"),
+                array_map(function ($location) {
+                    return new SpawnPoint($location["x"], $location["y"], $location["z"]);
+                }, $config->get("spawn_points")),
+                Server::getInstance()->getWorldManager()->getWorldByName($worldName)
+            ));
+        });
+
+        return $promiseResolver->getPromise();
     }
 
     /**
@@ -109,8 +124,8 @@ class Game {
     /**
      * @return string
      */
-    public function getName(): string {
-        return $this->name;
+    public function getPrefix(): string {
+        return $this->prefix;
     }
 
     /**
@@ -205,16 +220,29 @@ class Game {
 
         $player->teleport(new Position($spawnPoint->getX(), $spawnPoint->getY(), $spawnPoint->getZ(), $this->getWorld()));
 
+        $this->broadcastMessage("§a{$player->getName()} joined the game (" . $this->getPlayersCount() . "/" . $this->getMaxPlayers() . ")", true);
+
         return true;
+    }
+
+    /**
+     * @param string $message
+     * @param bool $prefix
+     * @return void
+     */
+    public function broadcastMessage(string $message, bool $prefix = false): void {
+        foreach ($this->teams as $team) {
+            foreach ($team->getPlayers() as $player) $player->sendMessage(($prefix ? $this->getPrefix() : "") . $message);
+        }
     }
 
     /**
      * @param string $message
      * @return void
      */
-    public function sendMessages(string $message): void {
+    public function broadcastPlayerMessage(string $message): void {
         foreach ($this->teams as $team) {
-            foreach ($team->getPlayers() as $player) $player->sendMessage($message);
+            foreach ($team->getPlayers() as $p) $p->sendMessage($message);
         }
     }
 }

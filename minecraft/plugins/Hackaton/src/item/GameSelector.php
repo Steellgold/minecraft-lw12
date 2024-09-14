@@ -3,10 +3,10 @@
 namespace hackaton\item;
 
 use hackaton\form\lobby\ChoseGameForm;
-use hackaton\GAPlayer;
 use hackaton\lib\customies\item\CreativeInventoryInfo;
 use hackaton\lib\customies\item\ItemComponents;
 use hackaton\lib\customies\item\ItemComponentsTrait;
+use hackaton\player\GAPlayer;
 use pocketmine\item\Item;
 use pocketmine\item\ItemIdentifier;
 use pocketmine\item\ItemUseResult;

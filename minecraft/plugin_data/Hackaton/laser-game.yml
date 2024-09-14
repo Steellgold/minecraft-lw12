@@ -1,5 +1,5 @@
 id: laser-game
-name: Laser Game
+prefix: "§g[§eLaser Game§g] §r"
 description: "Attack your enemies with a laser gun!"
 
 max_players: 10

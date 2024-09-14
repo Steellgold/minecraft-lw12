@@ -2,7 +2,7 @@
 
 namespace hackaton\game;
 
-use hackaton\GAPlayer;
+use hackaton\player\GAPlayer;
 
 class Team {
 

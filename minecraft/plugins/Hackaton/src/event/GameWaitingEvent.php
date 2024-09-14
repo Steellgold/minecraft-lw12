@@ -3,7 +3,6 @@
 namespace hackaton\event;
 
 use hackaton\game\Game;
-use hackaton\GAPlayer;
 
 class GameWaitingEvent extends GameEvent {
 

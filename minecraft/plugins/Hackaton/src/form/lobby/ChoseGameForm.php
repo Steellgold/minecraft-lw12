@@ -2,9 +2,9 @@
 
 namespace hackaton\form\lobby;
 
-use hackaton\GAPlayer;
 use hackaton\lib\form\SimpleForm;
 use hackaton\Loader;
+use hackaton\player\GAPlayer;
 
 class ChoseGameForm extends SimpleForm {
 

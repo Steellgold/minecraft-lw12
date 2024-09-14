@@ -3,7 +3,7 @@
 namespace hackaton\event;
 
 use hackaton\game\Game;
-use hackaton\GAPlayer;
+use hackaton\player\GAPlayer;
 
 class GameLostEvent extends GameEvent {
 

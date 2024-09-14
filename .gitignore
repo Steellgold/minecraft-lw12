@@ -4,4 +4,6 @@ minecraft/white-list.txt
 minecraft/server.lock
 minecraft/players
 minecraft/worlds/*
-minecraft/server.log
+minecraft/crashdumps
+minecraft/ops.txt
+/minecraft/.idea

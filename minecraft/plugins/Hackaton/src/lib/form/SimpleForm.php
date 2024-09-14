@@ -2,7 +2,7 @@
 
 namespace hackaton\lib\form;
 
-use hackaton\GAPlayer;
+use hackaton\player\GAPlayer;
 
 abstract class SimpleForm extends Form {
 
