@@ -63,7 +63,6 @@ export const searchAction = async (username: string) => {
             .single();
 
           if (playerInfoError || !playerInfo) return { error: "Player info not found" };
-          console.log(playerInfo);
 
           const headResponse = await fetch(`${process.env.URL}api/${playerInfo.name}/head`);
           const headData = await headResponse.json();
@@ -95,6 +94,8 @@ export const searchAction = async (username: string) => {
 
   const totalDeaths = scoresData.reduce((acc, score) => acc + score.deathCount, 0);
   const totalScore = scoresData.reduce((acc, score) => acc + score.score, 0);
+
+  games.sort((a, b) => new Date(b.startedAt ?? new Date()).getTime() - new Date(a.startedAt ?? new Date()).getTime());
 
   return {
     username,
