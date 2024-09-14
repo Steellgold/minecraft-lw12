@@ -6,6 +6,7 @@ use hackaton\command\LobbyCommand;
 use hackaton\lib\customies\Customies;
 use hackaton\lib\GameLib;
 use hackaton\listener\PlayerListener;
+use hackaton\manager\EntityManager;
 use hackaton\manager\ItemManager;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\Config;
@@ -57,7 +58,12 @@ class Loader extends PluginBase {
         $this->loadListeners();
         $this->loadCommands();
 
+        EntityManager::getInstance()->initialize();
         ItemManager::getInstance()->initialize();
+
+        foreach ($this->getServer()->getWorldManager()->getWorlds() as $world) {
+            foreach ($world->getEntities() as $entity) $entity->flagForDespawn();
+        }
     }
 
     /**

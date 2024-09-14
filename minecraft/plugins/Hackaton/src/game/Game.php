@@ -2,6 +2,7 @@
 
 namespace hackaton\game;
 
+use hackaton\lib\customies\item\CustomiesItemFactory;
 use hackaton\player\GAPlayer;
 use hackaton\task\async\CopyWorldAsync;
 use hackaton\task\WaitingGameTask;
@@ -57,7 +58,7 @@ class Game {
         private readonly World $world
     ) {
         foreach ($teams as $team) {
-            $this->teams[] = new Team(Team::TYPE_SOLO, $team["name"], $team["color"]);
+            $this->teams[] = new Team(Team::TYPE_SOLO, $team["name"], $team["color"], $team["laser_color"]);
         }
 
         new WaitingGameTask($this);
@@ -324,6 +325,12 @@ class Game {
     public function start(): void {
         foreach ($this->getSpawnPoints() as $spawnPoint) {
             $this->getWorld()->setBlock($spawnPoint->add(0, -1, 0), VanillaBlocks::AIR());
+        }
+
+        foreach ($this->teams as $team) {
+            foreach ($team->getPlayers() as $player) {
+                $player->getInventory()->setItem(0, CustomiesItemFactory::getInstance()->get("hackaton:laser_gun"));
+            }
         }
     }
 }

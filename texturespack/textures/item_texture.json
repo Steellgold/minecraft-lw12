@@ -4,6 +4,9 @@
     "texture_data": {
         "game_selector": {
             "textures": "textures/items/game_selector"
+        },
+        "laser_gun": {
+            "textures": "textures/items/laser_gun"
         }
     }
 }

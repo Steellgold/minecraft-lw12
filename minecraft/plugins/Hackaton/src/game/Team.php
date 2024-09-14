@@ -3,6 +3,7 @@
 namespace hackaton\game;
 
 use hackaton\player\GAPlayer;
+use pocketmine\color\Color;
 
 class Team {
 
@@ -25,12 +26,15 @@ class Team {
      * @param int $type
      * @param string $name
      * @param string $color
+     * @param string $laserColor
      */
     public function __construct(
-        private readonly int $type,
+        private readonly int    $type,
         private readonly string $name,
-        private readonly string $color
-    ) { }
+        private readonly string $color,
+        private readonly string $laserColor
+    ) {
+    }
 
     /**
      * @return int
@@ -51,6 +55,14 @@ class Team {
      */
     public function getColor(): string {
         return $this->color;
+    }
+
+    /**
+     * @return Color
+     */
+    public function getLaserColor(): Color {
+        $rgb = explode(":", $this->laserColor);
+        return new Color((int)$rgb[0], (int)$rgb[1], (int)$rgb[2]);
     }
 
     /**

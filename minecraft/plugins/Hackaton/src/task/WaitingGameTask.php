@@ -27,7 +27,7 @@ class WaitingGameTask extends GameTask {
         }
 
         // Start the game if the time is greater than 30 seconds and the minimum number of players is reached
-        if ($this->getGame()->getPlayersCount() >= $this->getGame()->getMinPlayers() && $this->getTime() >= 30) {
+        if ($this->getGame()->getPlayersCount() >= $this->getGame()->getMinPlayers() && $this->getTime() >= 10) {
             $this->getGame()->setMode(Game::MODE_STARTING);
             new StartingGameTask($this->getGame());
             $this->getHandler()->cancel();

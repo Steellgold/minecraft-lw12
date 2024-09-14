@@ -9,20 +9,28 @@ game_duration: 300 # 5 minutes
 teams:
   - name: "Red"
     color: "§c"
+    laser_color: "255:0:0"
   - name: "Blue"
     color: "§9"
+    laser_color: "0:0:255"
   - name: "Green"
     color: "§a"
+    laser_color: "0:255:0"
   - name: "Yellow"
     color: "§e"
+    laser_color: "255:255:0"
   - name: "Purple"
     color: "§5"
+    laser_color: "255:0:255"
   - name: "Orange"
     color: "§6"
+    laser_color: "255:165:0"
   - name: "Pink"
     color: "§d"
+    laser_color: "255:192:203"
   - name: "White"
     color: "§f"
+    laser_color: "255:255:255"
 
 spawn_points:
   - x: 10.5
@@ -30,7 +38,7 @@ spawn_points:
     z: 10.5
   - x: 0.5
     y: 16
-    z: 10.5
+    z: 15.5
   - x: -9.5
     y: 16
     z: 10.5

@@ -128,6 +128,8 @@ class PlayerListener extends GameListener {
      * @return void
      */
     public function onPlayerDeath(PlayerDeathEvent $event): void {
+        $event->setDeathMessage("");
+
         /** @var GAPlayer $player */
         $player = $event->getPlayer();
         $game = $player->getGame();
