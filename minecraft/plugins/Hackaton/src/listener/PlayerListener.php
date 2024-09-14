@@ -3,6 +3,7 @@
 namespace hackaton\listener;
 
 use hackaton\game\Game;
+use hackaton\lib\customies\item\CustomiesItemFactory;
 use hackaton\Loader;
 use hackaton\player\formatter\BasicChatFormatter;
 use hackaton\player\formatter\GameChatFormatter;
@@ -32,16 +33,7 @@ class PlayerListener extends GameListener {
      * @return void
      */
     public function onBlockBreak(BlockBreakEvent $event): void {
-        /** @var GAPlayer $player */
-        $player = $event->getPlayer();
-        $game = $player->getGame();
-
-        if (is_null($game)) return;
-
-        if ($game->getMode() === Game::MODE_WAITING || $game->getMode() === Game::MODE_STARTING) {
-            $event->cancel();
-            return;
-        }
+        $event->cancel();
     }
 
     /**
@@ -110,6 +102,9 @@ class PlayerListener extends GameListener {
             $lobbyWorld
         );
         $player->teleport($position);
+
+        $player->clearInventories();
+        $player->getInventory()->setItem(4, CustomiesItemFactory::getInstance()->get("hackaton:game_selector"));
     }
 
     /**

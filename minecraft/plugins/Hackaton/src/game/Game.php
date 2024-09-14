@@ -255,6 +255,8 @@ class Game {
 
         $this->broadcastMessage("§a{$player->getName()} joined the game (" . $this->getPlayersCount() . "/" . $this->getMaxPlayers() . ")", true);
 
+        $player->clearInventories();
+
         return true;
     }
 

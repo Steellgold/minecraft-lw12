@@ -2,6 +2,7 @@
 
 namespace hackaton;
 
+use hackaton\command\LobbyCommand;
 use hackaton\lib\customies\Customies;
 use hackaton\lib\GameLib;
 use hackaton\listener\PlayerListener;
@@ -9,6 +10,8 @@ use hackaton\manager\ItemManager;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\Config;
 use pocketmine\utils\TextFormat as TF;
+use pocketmine\world\Position;
+use pocketmine\world\World;
 
 class Loader extends PluginBase {
 
@@ -52,6 +55,7 @@ class Loader extends PluginBase {
 
         $this->loadLibs();
         $this->loadListeners();
+        $this->loadCommands();
 
         ItemManager::getInstance()->initialize();
     }
@@ -76,6 +80,15 @@ class Loader extends PluginBase {
      */
     private function loadListeners(): void {
         new PlayerListener();
+    }
+
+    /**
+     * @return void
+     */
+    private function loadCommands(): void {
+        $this->getServer()->getCommandMap()->registerAll("hackaton", [
+            new LobbyCommand()
+        ]);
     }
 
     /**
@@ -106,6 +119,20 @@ class Loader extends PluginBase {
         closedir($dh);
 
         @rmdir($path);
+    }
+
+    /**
+     * @return Position
+     */
+    public function getLobbySpawn(): Position {
+        $config = $this->getConfig();
+
+        return new Position(
+            $config->getNested("lobby.spawn.x"),
+            $config->getNested("lobby.spawn.y"),
+            $config->getNested("lobby.spawn.z"),
+            $this->getServer()->getWorldManager()->getWorldByName($config->getNested("lobby.world"))
+        );
     }
 
     /**

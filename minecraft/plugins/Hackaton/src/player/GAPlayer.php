@@ -63,4 +63,15 @@ class GAPlayer extends Player {
     public function sendSound(Sound $sound): void {
         $this->getWorld()->addSound($this->getPosition(), $sound, [$this]);
     }
+
+    /**
+     * @return void
+     */
+    public function clearInventories(): void {
+        $this->getInventory()->clearAll();
+        $this->getArmorInventory()->clearAll();
+        $this->getCursorInventory()->clearAll();
+        $this->getOffHandInventory()->clearAll();
+        $this->getEnderInventory()->clearAll();
+    }
 }
