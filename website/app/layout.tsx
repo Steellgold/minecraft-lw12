@@ -4,6 +4,7 @@ import "./globals.css";
 import { Component } from "@/lib/component";
 import { PropsWithChildren } from "react";
 import { ThemeProvider } from "@/lib/components/ui/theme-switcher";
+import { Toaster } from "@/lib/components/ui/toaster";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -28,6 +29,7 @@ const RootLayout: Component<PropsWithChildren> = ({ children }) => {
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           {children}
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>
