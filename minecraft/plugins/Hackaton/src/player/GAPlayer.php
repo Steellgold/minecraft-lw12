@@ -5,7 +5,13 @@ namespace hackaton\player;
 use hackaton\game\Game;
 use hackaton\Loader;
 use hackaton\manager\GameManager;
+use hackaton\player\scoreboard\Scoreboard;
+use pocketmine\entity\Location;
+use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\player\Player;
+use pocketmine\player\PlayerInfo;
+use pocketmine\Server;
 use pocketmine\utils\Config;
 use pocketmine\world\sound\Sound;
 
@@ -13,6 +19,29 @@ class GAPlayer extends Player {
 
     /** @var Game|null */
     private Game|null $game = null;
+
+    /** @var Scoreboard */
+    private Scoreboard $scoreboard;
+
+    /**
+     * @param Server $server
+     * @param NetworkSession $session
+     * @param PlayerInfo $playerInfo
+     * @param bool $authenticated
+     * @param Location $spawnLocation
+     * @param CompoundTag|null $namedtag
+     */
+    public function __construct(Server $server, NetworkSession $session, PlayerInfo $playerInfo, bool $authenticated, Location $spawnLocation, ?CompoundTag $namedtag) {
+        parent::__construct($server, $session, $playerInfo, $authenticated, $spawnLocation, $namedtag);
+        $this->scoreboard = new Scoreboard($this);
+    }
+
+    /**
+     * @return Scoreboard
+     */
+    public function getScoreboard(): Scoreboard {
+        return $this->scoreboard;
+    }
 
     /**
      * @return Game|null

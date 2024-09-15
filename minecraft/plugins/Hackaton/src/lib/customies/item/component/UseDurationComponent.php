@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace hackaton\lib\customies\item\item\component;
+namespace hackaton\lib\customies\item\component;
 
 final class UseDurationComponent implements ItemComponent {
 

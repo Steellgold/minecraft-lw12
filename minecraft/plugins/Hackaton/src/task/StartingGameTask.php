@@ -30,7 +30,7 @@ class StartingGameTask extends GameTask {
             $game->broadcastTitle("Good luck!");
             $game->broadcastSound(new NoteSound(NoteInstrument::PIANO(), 25));
             $game->setMode(Game::MODE_RUNNING);
-            // new ManageGameTask($game);
+            new ManageGameTask($game);
             $this->getHandler()->cancel();
             return;
         }

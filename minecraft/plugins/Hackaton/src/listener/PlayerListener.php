@@ -9,6 +9,7 @@ use hackaton\player\formatter\BasicChatFormatter;
 use hackaton\player\formatter\GameChatFormatter;
 use hackaton\player\GAPlayer;
 use pocketmine\event\block\BlockBreakEvent;
+use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\player\PlayerChatEvent;
 use pocketmine\event\player\PlayerCreationEvent;
 use pocketmine\event\player\PlayerDeathEvent;
@@ -136,5 +137,13 @@ class PlayerListener extends GameListener {
         if (is_null($game)) return;
 
         $event->setKeepInventory(true);
+    }
+
+    /**
+     * @param EntityDamageEvent $event
+     * @return void
+     */
+    public function onEntityDamage(EntityDamageEvent $event): void {
+        if ($event->getCause() === EntityDamageEvent::CAUSE_FALL) $event->cancel();
     }
 }

@@ -3,6 +3,7 @@
 namespace hackaton\item;
 
 use hackaton\entity\Laser;
+use hackaton\lib\customies\item\component\ThrowableComponent;
 use hackaton\lib\customies\item\CreativeInventoryInfo;
 use hackaton\lib\customies\item\ItemComponents;
 use hackaton\lib\customies\item\ItemComponentsTrait;
@@ -28,13 +29,14 @@ class LaserGun extends ProjectileItem implements ItemComponents {
 
         $this->initComponent("laser_gun", new CreativeInventoryInfo(CreativeInventoryInfo::CATEGORY_EQUIPMENT));
         $this->setupRenderOffsets(40, 32, true);
+        $this->addComponent(new ThrowableComponent(false));
     }
 
     /**
      * @return float
      */
     public function getThrowForce(): float {
-        return 3;
+        return 4;
     }
 
     /**
@@ -71,7 +73,7 @@ class LaserGun extends ProjectileItem implements ItemComponents {
      * @param array $returnedItems
      * @return ItemUseResult
      */
-    public function onClickAir(Player $player, Vector3 $directionVector, array &$returnedItems) : ItemUseResult{
+    public function onClickAir(Player $player, Vector3 $directionVector, array &$returnedItems): ItemUseResult {
         $location = $player->getLocation();
 
         $projectile = $this->createEntity(Location::fromObject($player->getEyePos(), $player->getWorld(), $location->yaw, $location->pitch), $player);
@@ -79,7 +81,7 @@ class LaserGun extends ProjectileItem implements ItemComponents {
 
         $projectileEv = new ProjectileLaunchEvent($projectile);
         $projectileEv->call();
-        if($projectileEv->isCancelled()){
+        if ($projectileEv->isCancelled()) {
             $projectile->flagForDespawn();
             return ItemUseResult::FAIL;
         }

@@ -7,6 +7,7 @@ use hackaton\player\GAPlayer;
 use hackaton\task\async\CopyWorldAsync;
 use hackaton\task\WaitingGameTask;
 use pocketmine\block\VanillaBlocks;
+use pocketmine\player\GameMode;
 use pocketmine\promise\Promise;
 use pocketmine\promise\PromiseResolver;
 use pocketmine\Server;
@@ -50,12 +51,12 @@ class Game {
         private readonly string $id,
         private readonly string $prefix,
         private readonly string $description,
-        private readonly int $minPlayers,
-        private readonly int $maxPlayers,
-        private readonly int $duration,
-        array $teams,
-        private readonly array $spawnPoints,
-        private readonly World $world
+        private readonly int    $minPlayers,
+        private readonly int    $maxPlayers,
+        private readonly int    $duration,
+        array                   $teams,
+        private readonly array  $spawnPoints,
+        private readonly World  $world
     ) {
         foreach ($teams as $team) {
             $this->teams[] = new Team(Team::TYPE_SOLO, $team["name"], $team["color"], $team["laser_color"]);
@@ -198,7 +199,7 @@ class Game {
      * @return array
      */
     public function getUnusedSpawnPoints(): array {
-        return array_filter($this->spawnPoints, function(SpawnPoint $spawnPoint) {
+        return array_filter($this->spawnPoints, function (SpawnPoint $spawnPoint) {
             return is_null($spawnPoint->getPlayer());
         });
     }
@@ -328,9 +329,19 @@ class Game {
         }
 
         foreach ($this->teams as $team) {
-            foreach ($team->getPlayers() as $player) {
-                $player->getInventory()->setItem(0, CustomiesItemFactory::getInstance()->get("hackaton:laser_gun"));
-            }
+            foreach ($team->getPlayers() as $player) $this->spawnPlayer($player);
         }
+    }
+
+    /**
+     * @param GAPlayer $player
+     * @return void
+     */
+    public function spawnPlayer(GAPlayer $player): void {
+        $spawnPoint = $this->getPlayerSpawnPoint($player);
+        $player->teleport($spawnPoint);
+        $player->setGamemode(GameMode::SURVIVAL());
+        $player->setHealth(20);
+        $player->getInventory()->setItem(0, CustomiesItemFactory::getInstance()->get("hackaton:laser_gun"));
     }
 }

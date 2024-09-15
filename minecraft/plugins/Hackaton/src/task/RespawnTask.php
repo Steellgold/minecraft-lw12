@@ -28,11 +28,7 @@ class RespawnTask extends GameTask {
         if ($this->getTime() < 7) return;
 
         if ($this->getTime() === 10) {
-            $spawnPoint = $this->getGame()->getPlayerSpawnPoint($this->player);
-            $this->player->teleport($spawnPoint);
-            $this->player->setGamemode(GameMode::SURVIVAL());
-            $this->player->setHealth(20);
-            $this->player->getInventory()->setItem(0, CustomiesItemFactory::getInstance()->get("hackaton:laser_gun"));
+            $this->getGame()->spawnPlayer($this->player);
             $this->getHandler()->cancel();
             return;
         }

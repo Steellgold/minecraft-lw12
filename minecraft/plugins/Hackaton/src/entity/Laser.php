@@ -12,6 +12,8 @@ use pocketmine\event\entity\ProjectileHitEntityEvent;
 use pocketmine\event\entity\ProjectileHitEvent;
 use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\network\mcpe\NetworkBroadcastUtils;
+use pocketmine\network\mcpe\protocol\PlaySoundPacket;
 use pocketmine\player\GameMode;
 use pocketmine\world\particle\CriticalParticle;
 use pocketmine\world\particle\DustParticle;
@@ -103,6 +105,17 @@ class Laser extends Throwable {
         $hitEntity->clearInventories();
         $hitEntity->setGamemode(GameMode::SPECTATOR());
         new RespawnTask($game, $hitEntity);
+
+        NetworkBroadcastUtils::broadcastPackets([$shootingEntity], [
+            PlaySoundPacket::create(
+                "random.orb",
+                $shootingEntity->location->getX(),
+                $shootingEntity->location->getY(),
+                $shootingEntity->location->getZ(),
+                1,
+                1
+            )
+        ]);
     }
 
     /**
