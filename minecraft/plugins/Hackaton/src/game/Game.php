@@ -36,6 +36,9 @@ class Game {
     /** @var Team[] */
     private array $teams = [];
 
+    /** @var bool */
+    private bool $finish = false;
+
     /**
      * @param string $id
      * @param string $prefix
@@ -59,7 +62,7 @@ class Game {
         private readonly World  $world
     ) {
         foreach ($teams as $team) {
-            $this->teams[] = new Team(Team::TYPE_SOLO, $team["name"], $team["color"], $team["laser_color"]);
+            $this->teams[] = new Team(Team::TYPE_SOLO, $team["name"], $team["color"], $team["laser_color"], $team["icon"]);
         }
 
         new WaitingGameTask($this);
@@ -82,9 +85,9 @@ class Game {
                 $config->get("id"),
                 $config->get("prefix"),
                 $config->get("description"),
-                $config->get("min_players"),
-                $config->get("max_players"),
-                $config->get("duration"),
+                (int)$config->get("min_players"),
+                (int)$config->get("max_players"),
+                (int)$config->get("game_duration"),
                 $config->get("teams"),
                 array_map(function ($location) {
                     return new SpawnPoint($location["x"], $location["y"], $location["z"]);
@@ -234,6 +237,20 @@ class Game {
     }
 
     /**
+     * @return bool
+     */
+    public function isFinish(): bool {
+        return $this->finish;
+    }
+
+    /**
+     * @param bool $finish
+     */
+    public function setFinish(bool $finish): void {
+        $this->finish = $finish;
+    }
+
+    /**
      * @param GAPlayer $player
      * @return bool
      */
@@ -255,7 +272,7 @@ class Game {
 
         $player->teleport(new Position($spawnPoint->getX(), $spawnPoint->getY(), $spawnPoint->getZ(), $this->getWorld()));
 
-        $this->broadcastMessage("§a{$player->getName()} joined the game (" . $this->getPlayersCount() . "/" . $this->getMaxPlayers() . ")", true);
+        $this->broadcastMessage("§a§l» §r§7{$player->getName()} joined the game. §8[" . $this->getPlayersCount() . "/" . $this->getMaxPlayers() . "]");
 
         $player->clearInventories();
 
@@ -274,7 +291,7 @@ class Game {
             $spawnPoint = $this->getPlayerSpawnPoint($player);
             if (!is_null($spawnPoint)) $spawnPoint->setPlayer(null);
 
-            $this->broadcastMessage("§c{$player->getName()} left the game (" . $this->getPlayersCount() . "/" . $this->getMaxPlayers() . ")", true);
+            $this->broadcastMessage("§c§l» §r§7{$player->getName()} left the game. §8[" . $this->getPlayersCount() . "/" . $this->getMaxPlayers() . "]");
         }
     }
 
@@ -297,6 +314,16 @@ class Game {
     public function broadcastTitle(string $title, string $subtitle = ""): void {
         foreach ($this->teams as $team) {
             foreach ($team->getPlayers() as $player) $player->sendTitle($title, $subtitle);
+        }
+    }
+
+    /**
+     * @param string $message
+     * @return void
+     */
+    public function broadcastActionBarMessage(string $message): void {
+        foreach ($this->teams as $team) {
+            foreach ($team->getPlayers() as $player) $player->sendActionBarMessage($message);
         }
     }
 
@@ -331,6 +358,13 @@ class Game {
         foreach ($this->teams as $team) {
             foreach ($team->getPlayers() as $player) $this->spawnPlayer($player);
         }
+    }
+
+    /**
+     * @return void
+     */
+    public function finish(): void {
+
     }
 
     /**

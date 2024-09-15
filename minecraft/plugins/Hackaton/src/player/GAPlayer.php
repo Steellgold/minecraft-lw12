@@ -33,7 +33,7 @@ class GAPlayer extends Player {
      */
     public function __construct(Server $server, NetworkSession $session, PlayerInfo $playerInfo, bool $authenticated, Location $spawnLocation, ?CompoundTag $namedtag) {
         parent::__construct($server, $session, $playerInfo, $authenticated, $spawnLocation, $namedtag);
-        $this->scoreboard = new Scoreboard($this);
+        Scoreboard::create($this);
     }
 
     /**
@@ -41,6 +41,13 @@ class GAPlayer extends Player {
      */
     public function getScoreboard(): Scoreboard {
         return $this->scoreboard;
+    }
+
+    /**
+     * @param Scoreboard $scoreboard
+     */
+    public function setScoreboard(Scoreboard $scoreboard): void {
+        $this->scoreboard = $scoreboard;
     }
 
     /**

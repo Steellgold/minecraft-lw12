@@ -10,27 +10,42 @@ teams:
   - name: "Red"
     color: "§c"
     laser_color: "255:0:0"
+    icon: ""
+
   - name: "Blue"
     color: "§9"
     laser_color: "0:0:255"
-  - name: "Green"
-    color: "§a"
-    laser_color: "0:255:0"
+    icon: ""
+
   - name: "Yellow"
     color: "§e"
     laser_color: "255:255:0"
+    icon: ""
+
+  - name: "Green"
+    color: "§a"
+    laser_color: "0:255:0"
+    icon: ""
+
   - name: "Purple"
     color: "§5"
     laser_color: "255:0:255"
+    icon: ""
+
   - name: "Orange"
     color: "§6"
     laser_color: "255:165:0"
+    icon: ""
+
   - name: "Pink"
     color: "§d"
     laser_color: "255:192:203"
+    icon: ""
+
   - name: "White"
     color: "§f"
     laser_color: "255:255:255"
+    icon: ""
 
 spawn_points:
   - x: 10.5

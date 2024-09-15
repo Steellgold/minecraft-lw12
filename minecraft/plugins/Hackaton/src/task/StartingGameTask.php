@@ -11,7 +11,7 @@ class StartingGameTask extends GameTask {
 
     public function onRun(): void {
         parent::onRun();
-        
+
         $game = $this->getGame();
         if ($game->getMode() !== Game::MODE_STARTING) return;
 
@@ -27,16 +27,15 @@ class StartingGameTask extends GameTask {
 
         if ($this->getTime() === 10) {
             $game->start();
-            $game->broadcastTitle("Good luck!");
+            //$game->broadcastTip("§eGame start §l§g» §r" . str_repeat("§e█", 10));
             $game->broadcastSound(new NoteSound(NoteInstrument::PIANO(), 25));
             $game->setMode(Game::MODE_RUNNING);
             new ManageGameTask($game);
             $this->getHandler()->cancel();
-            return;
         }
 
         // Broadcast the countdown message
-        $game->broadcastTitle("The game will start in", 10 - $this->getTime());
+        $game->broadcastActionBarMessage("§eThe game starts in  §l§g» §r" . str_repeat("§e▌", 10 - $this->getTime()) . str_repeat("§7▌", $this->getTime()));
         $game->broadcastSound(new NoteSound(NoteInstrument::PIANO(), 12));
     }
 }

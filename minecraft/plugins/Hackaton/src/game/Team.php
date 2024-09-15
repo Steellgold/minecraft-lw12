@@ -27,12 +27,14 @@ class Team {
      * @param string $name
      * @param string $color
      * @param string $laserColor
+     * @param string $icon
      */
     public function __construct(
         private readonly int    $type,
         private readonly string $name,
         private readonly string $color,
-        private readonly string $laserColor
+        private readonly string $laserColor,
+        private readonly string $icon
     ) {
     }
 
@@ -63,6 +65,13 @@ class Team {
     public function getLaserColor(): Color {
         $rgb = explode(":", $this->laserColor);
         return new Color((int)$rgb[0], (int)$rgb[1], (int)$rgb[2]);
+    }
+
+    /**
+     * @return string
+     */
+    public function getIcon(): string {
+        return $this->icon;
     }
 
     /**

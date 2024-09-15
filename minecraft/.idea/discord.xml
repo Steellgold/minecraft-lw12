@@ -2,7 +2,9 @@
 <project version="4">
   <component name="DiscordProjectSettings">
     <option name="show" value="ASK" />
-    <option name="description" value="" />
+    <option name="nameOverrideEnabled" value="true" />
+    <option name="nameOverrideText" value="Hackaton LW12" />
+    <option name="description" value="Supabase Hackaton Launch Week 12" />
     <option name="applicationTheme" value="default" />
     <option name="iconsTheme" value="default" />
     <option name="button1Title" value="" />
