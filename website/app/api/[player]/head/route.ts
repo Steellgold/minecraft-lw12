@@ -1,6 +1,4 @@
-import { prisma } from "@/lib/db/prisma";
 import { supabase } from "@/lib/db/supabase";
-import { Player } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
