@@ -3,7 +3,7 @@
 import { ArrowLeft } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Button } from "./ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader } from "./ui/card";
+import { Card, CardContent, CardDescription, CardHeader } from "./ui/card";
 import { Component } from "../component/component";
 import { GState } from "@/app/page";
 import { GameComponent } from "./game";
