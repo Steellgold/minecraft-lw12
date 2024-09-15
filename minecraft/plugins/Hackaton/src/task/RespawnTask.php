@@ -25,14 +25,16 @@ class RespawnTask extends GameTask {
     public function onRun(): void {
         parent::onRun();
 
-        if ($this->getTime() < 7) return;
-
-        if ($this->getTime() === 10) {
-            $this->getGame()->spawnPlayer($this->player);
+        if ($this->getGame()->isFinish()) {
             $this->getHandler()->cancel();
             return;
         }
 
-        $this->player->sendTitle(10 - $this->getTime());
+        if ($this->getTime() === 10) {
+            $this->getGame()->spawnPlayer($this->player);
+            $this->getHandler()->cancel();
+        }
+
+        $this->player->sendActionBarMessage("§cRespawn in §l§4» §r" . str_repeat("§c▌", 10 - $this->getTime()) . str_repeat("§7▌", $this->getTime()));
     }
 }

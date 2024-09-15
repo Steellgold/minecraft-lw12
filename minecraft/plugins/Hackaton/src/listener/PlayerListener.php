@@ -16,6 +16,7 @@ use pocketmine\event\player\PlayerDeathEvent;
 use pocketmine\event\player\PlayerJoinEvent;
 use pocketmine\event\player\PlayerQuitEvent;
 use pocketmine\event\player\PlayerRespawnEvent;
+use pocketmine\player\GameMode;
 use pocketmine\Server;
 use pocketmine\world\Position;
 
@@ -42,18 +43,19 @@ class PlayerListener extends GameListener {
      * @return void
      */
     public function onPlayerChat(PlayerChatEvent $event): void {
-        /** @var GAPlayer $player */
-        $player = $event->getPlayer();
-        $recipients = $event->getRecipients();
-        $game = $player->getGame();
-
         $event->setFormatter(new BasicChatFormatter());
 
-        if (!is_null($game)) $event->setFormatter(new GameChatFormatter($player));
+        /** @var GAPlayer $player */
+        $player = $event->getPlayer();
+        $session = $player->getSession();
+        if (!is_null($session)) $event->setFormatter(new GameChatFormatter($player));
+
+        $recipients = $event->getRecipients();
+        $game = $session?->getGame();
 
         foreach ($recipients as $key => $recipient) {
             if ($recipient instanceof GAPlayer) {
-                if ($recipient->getGame() !== $game) {
+                if ($recipient->getSession()?->getGame() !== $game) {
                     unset($recipients[$key]);
                 }
             }
@@ -71,11 +73,10 @@ class PlayerListener extends GameListener {
 
         /** @var GAPlayer $player */
         $player = $event->getPlayer();
-        $game = $player->getGame();
+        $session = $player->getSession();
+        if (is_null($session)) return;
 
-        if (is_null($game)) return;
-
-        $game->quit($player);
+        $session->getGame()->quit($player);
     }
 
     /**
@@ -105,6 +106,7 @@ class PlayerListener extends GameListener {
         $player->teleport($position);
 
         $player->clearInventories();
+        $player->setGamemode(GameMode::ADVENTURE());
         $player->getInventory()->setItem(4, CustomiesItemFactory::getInstance()->get("hackaton:game_selector"));
     }
 
@@ -115,8 +117,10 @@ class PlayerListener extends GameListener {
     public function onPlayerRespawn(PlayerRespawnEvent $event): void {
         /** @var GAPlayer $player */
         $player = $event->getPlayer();
-        $game = $player->getGame();
-        if (is_null($game)) return;
+        $session = $player->getSession();
+        if (is_null($session)) return;
+
+        $game = $session->getGame();
 
         $spawnPoint = $game->getPlayerSpawnPoint($player);
         if (is_null($spawnPoint)) return;
@@ -130,11 +134,10 @@ class PlayerListener extends GameListener {
      */
     public function onPlayerDeath(PlayerDeathEvent $event): void {
         $event->setDeathMessage("");
-
         /** @var GAPlayer $player */
         $player = $event->getPlayer();
-        $game = $player->getGame();
-        if (is_null($game)) return;
+        $session = $player->getSession();
+        if (is_null($session)) return;
 
         $event->setKeepInventory(true);
     }
@@ -144,6 +147,6 @@ class PlayerListener extends GameListener {
      * @return void
      */
     public function onEntityDamage(EntityDamageEvent $event): void {
-        if ($event->getCause() === EntityDamageEvent::CAUSE_FALL) $event->cancel();
+        $event->cancel();
     }
 }

@@ -8,6 +8,7 @@ use hackaton\player\GAPlayer;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\permission\DefaultPermissions;
+use pocketmine\player\GameMode;
 
 class LobbyCommand extends Command {
 
@@ -25,10 +26,11 @@ class LobbyCommand extends Command {
     public function execute(CommandSender $sender, string $commandLabel, array $args): void {
         if (!$sender instanceof GAPlayer) return;
 
-        $game = $sender->getGame();
-        if (!is_null($game)) $game->quit($sender);
+        $session = $sender->getSession();
+        if (!is_null($session)) $session->getGame()->quit($sender);
 
         $sender->teleport(Loader::getInstance()->getLobbySpawn());
+        $sender->setGamemode(GameMode::ADVENTURE());
 
         $sender->clearInventories();
         $sender->getInventory()->setItem(4, CustomiesItemFactory::getInstance()->get("hackaton:game_selector"));

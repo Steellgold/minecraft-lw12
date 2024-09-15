@@ -18,7 +18,7 @@ class GameChatFormatter implements ChatFormatter {
      * @return string
      */
     public function format(string $username, string $message): string {
-        $team = $this->player->getGame()->getTeamByPlayer($this->player);
+        $team = $this->player->getSession()->getGame()->getTeamByPlayer($this->player);
 
         return $team->getColor() . "[" . strtoupper($team->getName()) . "] " . "§7{$username} §l»§r§7 {$message}";
     }

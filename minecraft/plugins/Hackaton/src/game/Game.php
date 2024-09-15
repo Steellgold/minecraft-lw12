@@ -4,6 +4,7 @@ namespace hackaton\game;
 
 use hackaton\lib\customies\item\CustomiesItemFactory;
 use hackaton\player\GAPlayer;
+use hackaton\player\PlayerSession;
 use hackaton\task\async\CopyWorldAsync;
 use hackaton\task\WaitingGameTask;
 use pocketmine\block\VanillaBlocks;
@@ -161,7 +162,7 @@ class Game {
     public function getPlayersCount(): int {
         $count = 0;
         foreach ($this->teams as $team) {
-            $count += count($team->getPlayers());
+            $count += count($team->getSessions());
         }
         return $count;
     }
@@ -185,6 +186,19 @@ class Game {
      */
     public function getSpawnPoints(): array {
         return $this->spawnPoints;
+    }
+
+    /**
+     * @param string $uuid
+     * @return PlayerSession|null
+     */
+    public function getPlayerSession(string $uuid): ?PlayerSession {
+        foreach ($this->teams as $team) {
+            foreach ($team->getSessions() as $session) {
+                if ($session->getUuid()->toString() === $uuid) return $session;
+            }
+        }
+        return null;
     }
 
     /**
@@ -213,7 +227,7 @@ class Game {
     public function getSmallestTeam(): ?Team {
         $smallest = null;
         foreach ($this->teams as $team) {
-            if ($smallest === null || count($team->getPlayers()) < count($smallest->getPlayers())) {
+            if ($smallest === null || count($team->getSessions()) < count($smallest->getSessions())) {
                 $smallest = $team;
             }
         }
@@ -222,7 +236,7 @@ class Game {
 
     public function getTeamByPlayer(GAPlayer $player): ?Team {
         foreach ($this->teams as $team) {
-            if (in_array($player, $team->getPlayers())) {
+            if (in_array($player->getSession(), $team->getSessions())) {
                 return $team;
             }
         }
@@ -260,8 +274,6 @@ class Game {
         $team = $this->getSmallestTeam();
         if (is_null($team)) return false;
 
-        $team->addPlayer($player);
-
         $spawnPoints = $this->getUnusedSpawnPoints();
         if (empty($spawnPoints)) return false;
 
@@ -269,6 +281,9 @@ class Game {
         if (is_null($spawnPoint)) return false;
 
         $spawnPoint->setPlayer($player);
+
+        $player->setSession(new PlayerSession($player->getUniqueId(), $player->getName(), $this));
+        $team->addSession($player->getSession());
 
         $player->teleport(new Position($spawnPoint->getX(), $spawnPoint->getY(), $spawnPoint->getZ(), $this->getWorld()));
 
@@ -285,11 +300,16 @@ class Game {
      */
     public function quit(GAPlayer $player): void {
         foreach ($this->teams as $team) {
-            $success = $team->removePlayer($player);
-            if (!$success) continue;
+            if ($this->getMode() === self::MODE_WAITING || $this->getMode() === self::MODE_STARTING) {
+                $success = $team->removeSession($player->getSession());
+                if (!$success) continue;
+            }
 
+            $player->setSession(null);
             $spawnPoint = $this->getPlayerSpawnPoint($player);
             if (!is_null($spawnPoint)) $spawnPoint->setPlayer(null);
+
+            $player->getScoreboard()->remove();
 
             $this->broadcastMessage("§c§l» §r§7{$player->getName()} left the game. §8[" . $this->getPlayersCount() . "/" . $this->getMaxPlayers() . "]");
         }
@@ -302,7 +322,7 @@ class Game {
      */
     public function broadcastMessage(string $message, bool $prefix = false): void {
         foreach ($this->teams as $team) {
-            foreach ($team->getPlayers() as $player) $player->sendMessage(($prefix ? $this->getPrefix() : "") . $message);
+            foreach ($team->getSessions() as $session) $session->getPlayer()?->sendMessage(($prefix ? $this->getPrefix() : "") . $message);
         }
     }
 
@@ -313,7 +333,7 @@ class Game {
      */
     public function broadcastTitle(string $title, string $subtitle = ""): void {
         foreach ($this->teams as $team) {
-            foreach ($team->getPlayers() as $player) $player->sendTitle($title, $subtitle);
+            foreach ($team->getSessions() as $session) $session->getPlayer()?->sendTitle($title, $subtitle);
         }
     }
 
@@ -323,7 +343,7 @@ class Game {
      */
     public function broadcastActionBarMessage(string $message): void {
         foreach ($this->teams as $team) {
-            foreach ($team->getPlayers() as $player) $player->sendActionBarMessage($message);
+            foreach ($team->getSessions() as $session) $session->getPlayer()?->sendActionBarMessage($message);
         }
     }
 
@@ -333,7 +353,7 @@ class Game {
      */
     public function broadcastSound(Sound $sound): void {
         foreach ($this->teams as $team) {
-            foreach ($team->getPlayers() as $player) $player->sendSound($sound);
+            foreach ($team->getSessions() as $session) $session->getPlayer()?->sendSound($sound);
         }
     }
 
@@ -343,7 +363,7 @@ class Game {
      */
     public function broadcastPlayerMessage(string $message): void {
         foreach ($this->teams as $team) {
-            foreach ($team->getPlayers() as $p) $p->sendMessage($message);
+            foreach ($team->getSessions() as $session) $session->getPlayer()?->sendMessage($message);
         }
     }
 
@@ -356,7 +376,13 @@ class Game {
         }
 
         foreach ($this->teams as $team) {
-            foreach ($team->getPlayers() as $player) $this->spawnPlayer($player);
+            foreach ($team->getSessions() as $session) {
+                $player = $session->getPlayer();
+                if (is_null($player)) continue;
+
+                $player->setGamemode(GameMode::SURVIVAL());
+                $this->spawnPlayer($player);
+            }
         }
     }
 
@@ -364,7 +390,47 @@ class Game {
      * @return void
      */
     public function finish(): void {
+        foreach ($this->teams as $team) {
+            foreach ($team->getSessions() as $session) {
+                $player = $session->getPlayer();
+                if (is_null($player)) continue;
 
+                $player->setSession(null);
+                $player->getScoreboard()->remove();
+                $player->setGamemode(GameMode::SPECTATOR());
+            }
+        }
+
+        // Display ranking
+        $ranking = $this->generateRanking();
+        $i = 1;
+        $messages = [];
+        foreach ($ranking as $uuid => $score) {
+            $session = $this->getPlayerSession($uuid);
+            if (is_null($session)) continue;
+
+            $messages[] = "§7#{$i} §f{$session->getName()}: §a{$session->getKills()} kills, §c{$session->getDeaths()} deaths";
+            $i++;
+        }
+
+        $this->broadcastMessage("§a§l» §r§7Game finished! Ranking:");
+        $this->broadcastMessage(implode("\n", $messages));
+    }
+
+    /**
+     * @return array
+     */
+    private function generateRanking(): array {
+        $ranking = [];
+        foreach ($this->teams as $team) {
+            foreach ($team->getSessions() as $session) {
+                $ranking[$session->getUuid()->toString()] = $session->getKills() - $session->getDeaths();
+            }
+        }
+
+        arsort($ranking);
+
+        return $ranking;
     }
 
     /**

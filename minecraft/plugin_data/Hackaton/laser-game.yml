@@ -4,7 +4,8 @@ description: "Attack your enemies with a laser gun!"
 
 max_players: 10
 min_players: 2
-game_duration: 300 # 5 minutes
+#game_duration: 300 # 5 minutes
+game_duration: 60 # 1 minute
 
 teams:
   - name: "Red"

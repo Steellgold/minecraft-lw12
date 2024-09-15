@@ -19,6 +19,7 @@ use pocketmine\world\particle\CriticalParticle;
 use pocketmine\world\particle\DustParticle;
 use pocketmine\world\particle\FlameParticle;
 use pocketmine\world\particle\SnowballPoofParticle;
+use pocketmine\world\sound\ExplodeSound;
 
 class Laser extends Throwable {
 
@@ -78,13 +79,13 @@ class Laser extends Throwable {
         $shootingEntity = $this->getOwningEntity();
         if (!$shootingEntity instanceof GAPlayer) return;
 
-        $game = $shootingEntity->getGame();
-        if (is_null($game)) return;
+        $session = $shootingEntity->getSession();
+        if (is_null($session)) return;
 
-        $team = $game->getTeamByPlayer($shootingEntity);
+        $team = $session->getGame()->getTeamByPlayer($shootingEntity);
         if (is_null($team)) return;
 
-        $hitTeam = $game->getTeamByPlayer($hitEntity);
+        $hitTeam = $session->getGame()->getTeamByPlayer($hitEntity);
         if (is_null($hitTeam)) return;
 
         // Check if the player is in the same team
@@ -104,7 +105,12 @@ class Laser extends Throwable {
 
         $hitEntity->clearInventories();
         $hitEntity->setGamemode(GameMode::SPECTATOR());
-        new RespawnTask($game, $hitEntity);
+        $hitEntity->sendTitle("§4» §cYou are dead §4«");
+        $hitEntity->sendSound(new ExplodeSound());
+        new RespawnTask($session->getGame(), $hitEntity);
+
+        $hitEntity->getSession()?->addDeath();
+        $session->addKill();
 
         NetworkBroadcastUtils::broadcastPackets([$shootingEntity], [
             PlaySoundPacket::create(

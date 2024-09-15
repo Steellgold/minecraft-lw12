@@ -4,7 +4,7 @@ namespace hackaton\task;
 
 use hackaton\game\Game;
 use hackaton\game\Team;
-use hackaton\player\scoreboard\ScoreboardContent;
+use hackaton\player\scoreboard\Scoreboard;
 use pocketmine\scheduler\CancelTaskException;
 
 class ManageGameTask extends GameTask {
@@ -16,22 +16,26 @@ class ManageGameTask extends GameTask {
     public function onRun(): void {
         parent::onRun();
 
-        if ($this->getTime() >= $this->getGame()->getDuration()) {
-            $this->getGame()->setMode(Game::MODE_FINISHED);
-            $this->getGame()->setFinish(true);
-            $this->getGame()->finish();
+        $game = $this->getGame();
+        if ($game->getMode() !== Game::MODE_RUNNING) return;
+
+        if ($this->getTime() > $this->getGame()->getDuration()) {
+            $game->setMode(Game::MODE_FINISHED);
+            $game->setFinish(true);
+            $game->finish();
+            new FinishGameTask($game);
             $this->getHandler()->cancel();
             return;
         }
 
-        foreach ($this->getGame()->getTeams() as $team) {
+        foreach ($game->getTeams() as $team) {
             $this->setScoreboard($team);
         }
 
-        if ($this->getGame()->isFinish()) {
-            foreach ($this->getGame()->getTeams() as $team) {
-                foreach ($team->getPlayers() as $player) {
-                    $player->getScoreboard()->remove();
+        if ($game->isFinish()) {
+            foreach ($game->getTeams() as $team) {
+                foreach ($team->getSessions() as $session) {
+                    $session->getPlayer()?->getScoreboard()->remove();
                 }
             }
         }
@@ -42,12 +46,12 @@ class ManageGameTask extends GameTask {
      * @return void
      */
     private function setScoreboard(Team $team): void {
-        foreach ($team->getPlayers() as $player) {
-            $player->getScoreboard()
+        foreach ($team->getSessions() as $session) {
+            $session->getPlayer()?->getScoreboard()
                 ->setLine(1, $team->getIcon())
                 ->setLine(2, " " . $this->getGame()->getPlayersCount() . "/" . $this->getGame()->getMaxPlayers())
-                ->setLine(3, " 0")
-                ->setLine(4, " 0")
+                ->setLine(3, " " . $session->getKills())
+                ->setLine(4, " " . $session->getDeaths())
                 ->setLine(5, " " . gmdate("i:s", $this->getGame()->getDuration() - $this->getTime()))
                 ->send();
         }

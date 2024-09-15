@@ -3,6 +3,7 @@
 namespace hackaton\game;
 
 use hackaton\player\GAPlayer;
+use hackaton\player\PlayerSession;
 use pocketmine\color\Color;
 
 class Team {
@@ -19,8 +20,8 @@ class Team {
     /** @var int */
     public const TYPE_SQUAD = 4;
 
-    /** @var GAPlayer[] */
-    private array $players = [];
+    /** @var PlayerSession[] */
+    private array $sessions = [];
 
     /**
      * @param int $type
@@ -77,37 +78,30 @@ class Team {
     /**
      * @return array
      */
-    public function getPlayers(): array {
-        return $this->players;
+    public function getSessions(): array {
+        return $this->sessions;
     }
 
     /**
-     * @param GAPlayer $player
+     * @param PlayerSession $session
      * @return void
      */
-    public function addPlayer(GAPlayer $player): void {
-        $this->players[$player->getUniqueId()->toString()] = $player;
+    public function addSession(PlayerSession $session): void {
+        $this->sessions[$session->getPlayer()->getUniqueId()->toString()] = $session;
     }
 
     /**
-     * @param GAPlayer $player
+     * @param PlayerSession $session
      * @return bool
      */
-    public function removePlayer(GAPlayer $player): bool {
-        $uuid = $player->getUniqueId()->toString();
-        $player = $this->players[$uuid] ?? null;
+    public function removeSession(PlayerSession $session): bool {
+        $uuid = $session->getPlayer()->getUniqueId()->toString();
+        $session = $this->sessions[$uuid] ?? null;
 
-        if (is_null($player)) return false;
+        if (is_null($session)) return false;
 
-        unset($this->players[$uuid]);
+        unset($this->sessions[$uuid]);
         return true;
-    }
-
-    /**
-     * @return int
-     */
-    public function getPlayerCount(): int {
-        return count($this->players);
     }
 
     /**

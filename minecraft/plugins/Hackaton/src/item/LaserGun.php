@@ -48,9 +48,9 @@ class LaserGun extends ProjectileItem implements ItemComponents {
         $laser = new Laser($location, $thrower);
 
         if ($thrower instanceof GAPlayer) {
-            $game = $thrower->getGame();
-            if (!is_null($game)) {
-                $team = $game->getTeamByPlayer($thrower);
+            $session = $thrower->getSession();
+            if (!is_null($session)) {
+                $team = $session->getGame()->getTeamByPlayer($thrower);
                 if (!is_null($team)) {
                     $laser->setColor($team->getLaserColor());
                 }

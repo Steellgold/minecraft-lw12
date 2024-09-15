@@ -15,6 +15,9 @@ class Scoreboard {
     public const FLAG_CORNER = "§m§b";
 
     /** @var string */
+    public const FLAG_STATES = "§m§a";
+
+    /** @var string */
     private string $objectiveName;
 
     /** @var string */
@@ -59,6 +62,15 @@ class Scoreboard {
      */
     public function getDisplayName(): string {
         return $this->displayName;
+    }
+
+    /**
+     * @param string $displayName
+     * @return Scoreboard
+     */
+    public function setDisplayName(string $displayName): Scoreboard {
+        $this->displayName = $displayName;
+        return $this;
     }
 
     /**

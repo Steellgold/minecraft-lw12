@@ -17,11 +17,11 @@ use pocketmine\world\sound\Sound;
 
 class GAPlayer extends Player {
 
-    /** @var Game|null */
-    private Game|null $game = null;
-
     /** @var Scoreboard */
     private Scoreboard $scoreboard;
+
+    /** @var PlayerSession|null */
+    private ?PlayerSession $session = null;
 
     /**
      * @param Server $server
@@ -51,10 +51,17 @@ class GAPlayer extends Player {
     }
 
     /**
-     * @return Game|null
+     * @return PlayerSession|null
      */
-    public function getGame(): ?Game {
-        return $this->game;
+    public function getSession(): ?PlayerSession {
+        return $this->session;
+    }
+
+    /**
+     * @param PlayerSession|null $session
+     */
+    public function setSession(?PlayerSession $session): void {
+        $this->session = $session;
     }
 
     /**
@@ -73,10 +80,7 @@ class GAPlayer extends Player {
         if (is_null($game)) {
             GameManager::getInstance()->createGame($config)->onCompletion(function (Game $game) {
                 $success = $game->join($this);
-                if ($success) {
-                    $this->game = $game;
-                    return;
-                }
+                if ($success) return;
 
                 $this->sendMessage(Loader::PREFIX . "Failed to join the game. Please try again later.");
             }, fn() => null);
@@ -84,10 +88,7 @@ class GAPlayer extends Player {
         }
 
         $success = $game->join($this);
-        if ($success) {
-            $this->game = $game;
-            return;
-        }
+        if ($success) return;
 
         $this->sendMessage(Loader::PREFIX . "Failed to join the game. Please try again later.");
     }
