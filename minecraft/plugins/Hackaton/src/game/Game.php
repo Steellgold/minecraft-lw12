@@ -5,9 +5,12 @@ namespace hackaton\game;
 use hackaton\lib\customies\item\CustomiesItemFactory;
 use hackaton\player\GAPlayer;
 use hackaton\player\PlayerSession;
+use hackaton\resource\Resource;
 use hackaton\task\async\CopyWorldAsync;
 use hackaton\task\WaitingGameTask;
+use JsonException;
 use pocketmine\block\VanillaBlocks;
+use pocketmine\entity\Skin;
 use pocketmine\player\GameMode;
 use pocketmine\promise\Promise;
 use pocketmine\promise\PromiseResolver;
@@ -267,6 +270,7 @@ class Game {
     /**
      * @param GAPlayer $player
      * @return bool
+     * @throws JsonException
      */
     public function join(GAPlayer $player): bool {
         if (!$this->isJoinable()) return false;
@@ -284,6 +288,10 @@ class Game {
 
         $player->setSession(new PlayerSession($player->getUniqueId(), $player->getName(), $this));
         $team->addSession($player->getSession());
+
+        $skinName = strtoupper($team->getName());
+        $player->setSkin(new Skin("TEAM_{$skinName}", Resource::PNGtoBYTES($skinName)));
+        $player->sendSkin();
 
         $player->teleport(new Position($spawnPoint->getX(), $spawnPoint->getY(), $spawnPoint->getZ(), $this->getWorld()));
 
@@ -310,6 +318,9 @@ class Game {
             if (!is_null($spawnPoint)) $spawnPoint->setPlayer(null);
 
             $player->getScoreboard()->remove();
+
+            $player->setSkin($player->getDefaultSkin());
+            $player->sendSkin();
 
             $this->broadcastMessage("§c§l» §r§7{$player->getName()} left the game. §8[" . $this->getPlayersCount() . "/" . $this->getMaxPlayers() . "]");
         }
@@ -398,6 +409,7 @@ class Game {
                 $player->setSession(null);
                 $player->getScoreboard()->remove();
                 $player->setGamemode(GameMode::SPECTATOR());
+                $player->clearInventories();
             }
         }
 

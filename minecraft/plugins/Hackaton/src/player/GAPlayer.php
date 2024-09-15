@@ -7,6 +7,7 @@ use hackaton\Loader;
 use hackaton\manager\GameManager;
 use hackaton\player\scoreboard\Scoreboard;
 use pocketmine\entity\Location;
+use pocketmine\entity\Skin;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\player\Player;
@@ -23,6 +24,9 @@ class GAPlayer extends Player {
     /** @var PlayerSession|null */
     private ?PlayerSession $session = null;
 
+    /** @var Skin */
+    private Skin $defaultSkin;
+
     /**
      * @param Server $server
      * @param NetworkSession $session
@@ -33,6 +37,7 @@ class GAPlayer extends Player {
      */
     public function __construct(Server $server, NetworkSession $session, PlayerInfo $playerInfo, bool $authenticated, Location $spawnLocation, ?CompoundTag $namedtag) {
         parent::__construct($server, $session, $playerInfo, $authenticated, $spawnLocation, $namedtag);
+        $this->defaultSkin = $this->getSkin();
         Scoreboard::create($this);
     }
 
@@ -62,6 +67,13 @@ class GAPlayer extends Player {
      */
     public function setSession(?PlayerSession $session): void {
         $this->session = $session;
+    }
+
+    /**
+     * @return Skin
+     */
+    public function getDefaultSkin(): Skin {
+        return $this->defaultSkin;
     }
 
     /**

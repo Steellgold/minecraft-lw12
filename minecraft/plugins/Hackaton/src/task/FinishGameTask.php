@@ -33,7 +33,6 @@ class FinishGameTask extends GameTask {
                     $player->clearInventories();
                     $player->setGamemode(GameMode::ADVENTURE());
                     $player->getInventory()->setItem(4, CustomiesItemFactory::getInstance()->get("hackaton:game_selector"));
-
                 }
             }
             $this->getHandler()->cancel();
