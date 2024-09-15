@@ -1,6 +1,4 @@
-import { prisma } from "@/lib/db/prisma";
 import { supabase } from "@/lib/db/supabase";
-import { Player } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -9,10 +7,18 @@ export const GET = async({ url }: NextRequest): Promise<NextResponse> => {
   const schema = z.string().safeParse(playerName);
   if (!schema.success) return NextResponse.json({ error: "Invalid player" }, { status: 400 });
 
-  const data = await prisma.$queryRaw<Player[]>`SELECT * FROM "Player" WHERE name = ${playerName} OR uuid = ${playerName} LIMIT 1`;
-  if (!data) return NextResponse.json({ error: "Player not found" }, { status: 404 });
+  // const data = await prisma.$queryRaw<Player[]>`SELECT * FROM "Player" WHERE name = ${playerName} OR uuid = ${playerName} LIMIT 1`;
+  // if (!data) return NextResponse.json({ error: "Player not found" }, { status: 404 });
+  const data = await supabase.from("Player")
+    .select("*")
+    .eq("name", playerName)
+    .limit(1);
 
-  const head = supabase.storage.from("heads").getPublicUrl(data[0].uuid + ".png");
+  console.log(data);
+  if (!data) return NextResponse.json({ error: "Player not found" }, { status: 404 });
+  if (!data.data) return NextResponse.json({ error: "Player not found" }, { status: 404 });
+
+  const head = supabase.storage.from("heads").getPublicUrl(data?.data[0].uuid + ".png");
   return NextResponse.json({ url: head?.data.publicUrl });
 }
 
@@ -24,13 +30,14 @@ export const PATCH = async(res: NextRequest): Promise<NextResponse> => {
   const schema = z.string().safeParse(playerName);
   if (!schema.success) return NextResponse.json({ error: "Invalid player" }, { status: 400 });
 
-  const data = await prisma.$queryRaw<Player[]>`SELECT * FROM "Player" WHERE name = ${playerName}`;
+  const data = await supabase.from("Player").select("*").eq("name", playerName);
   if (!data) return NextResponse.json({ error: "Player not found" }, { status: 404 });
+  if (!data.data) return NextResponse.json({ error: "Player not found" }, { status: 404 });
 
   const bodySchema = z.object({ head: z.string() }).safeParse(await res.json());
   if (!bodySchema.success) return NextResponse.json({ error: "Invalid body" }, { status: 400 });
 
-  const fileName = data[0].uuid + ".png";
+  const fileName = data?.data[0].uuid + ".png";
 
   const head = supabase.storage.from("heads").getPublicUrl(fileName);
   if (head) {
