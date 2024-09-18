@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { supabase } from "@/lib/db/supabase";
 import { prisma } from "@/lib/db/prisma";
 
 const gameSchema = z.object({
-  playerUuids: z.array(z.string()).min(2, "At least 2 players are required")
+  players: z.array(z.object({
+    uuid: z.string().uuid(),
+    team: z.enum(["RED", "BLUE"])
+  }))
 });
 
 export const POST = async (req: NextRequest): Promise<NextResponse> => {
@@ -15,51 +17,33 @@ export const POST = async (req: NextRequest): Promise<NextResponse> => {
 
   const body = await req.json();
   const schema = gameSchema.safeParse(body);
-
   if (!schema.success) {
+    console.log(schema.error);
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
-  const { playerUuids } = schema.data;
+  const { players } = schema.data;
 
-  const playersResponse = await supabase
-    .from("Player")
-    .select("*")
-    .in("uuid", playerUuids);
-
-  if (!playersResponse || !playersResponse.data || playersResponse.data.length !== playerUuids.length) {
-    return NextResponse.json({ error: "One or more players not found" }, { status: 404 });
-  }
-
-  const teamsByPlayer: Record<string, "RED" | "BLUE"> = playerUuids.reduce((acc, uuid, index) => {
-    const team = index % 2 === 0 ? "RED" : "BLUE";
-    return { ...acc, [uuid]: team };
-  }, {});
-
-  const data = await prisma.game.create({
+  const gameCreateResponse = await prisma.game.create({
     data: {
       players: {
-        connect: playersResponse.data.map((player) => ({
-          uuid: player.uuid
-        }))
+        connect: players.map((player) => ({ uuid: player.uuid }))
       },
       scores: {
         createMany: {
-          data: playerUuids.map((uuid) => ({
+          data: players.map((player) => ({
+            team: player.team,
             deathCount: 0,
             score: 0,
-            team: teamsByPlayer[uuid],
-            playerUuid: uuid
+            playerUuid: player.uuid
           }))
         }
       },
       status: "STARTED"
-    }
-  });
+    }}
+  );
 
-  console.log(data);
-
-  return NextResponse.json(data);
+  return NextResponse.json(gameCreateResponse);
 };
 
 export const PUT = async (req: NextRequest): Promise<NextResponse> => {
