@@ -7,3 +7,4 @@ minecraft/worlds/*
 minecraft/crashdumps
 minecraft/ops.txt
 /minecraft/.idea
+.vercel
