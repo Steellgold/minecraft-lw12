@@ -24,9 +24,7 @@ export const POST = async (req: NextRequest): Promise<NextResponse> => {
 
     const { name, head, uuid } = schema.data;
 
-    const existingPlayer = await prisma.player.findUnique({
-      where: { name }
-    });
+    const existingPlayer = await prisma.player.findUnique({ where: { name } });
 
     if (existingPlayer) {
       return NextResponse.json({ error: "Player with this name already exists" }, { status: 409 });
@@ -42,13 +40,19 @@ export const POST = async (req: NextRequest): Promise<NextResponse> => {
     });
 
     const fileName = newPlayer.uuid + ".png";
+
+    const fileExist = await supabase.storage.from("heads").exists(fileName);
+    if (fileExist.data) {
+      await supabase.storage.from("heads").remove([fileName]);
+    }
+
     const { error: uploadError } = await supabase.storage.from("heads").upload(fileName, Buffer.from(head, "base64"), {
       contentType: "image/png"
     });
 
     if (uploadError) {
-      await prisma.player.delete({ where: { uuid: newPlayer.uuid } });
-      return NextResponse.json({ error: "Failed to upload image" }, { status: 500 });
+      console.error("Error uploading head image:", uploadError);
+      return NextResponse.json({ error: "Failed to upload head image" }, { status: 500 });
     }
 
     return NextResponse.json(newPlayer);
