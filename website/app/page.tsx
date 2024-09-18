@@ -48,7 +48,7 @@ export type GState = {
       username: string;
       headUrl: string;
       score: number;
-      deaths: number;
+      deathCount: number;
       team: "RED" | "BLUE";
     }[];
   }[];
