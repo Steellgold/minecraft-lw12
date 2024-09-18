@@ -115,10 +115,9 @@ export const PATCH = async (req: NextRequest): Promise<NextResponse> => {
   }
 
   const body = await req.json();
+  const { gameId } = body;
 
-  const { gameId, status } = body;
-
-  if (!gameId || !status) {
+  if (!gameId) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
@@ -127,7 +126,7 @@ export const PATCH = async (req: NextRequest): Promise<NextResponse> => {
       id: gameId
     },
     data: {
-      status
+      status: "FINISHED"
     }
   });
 
