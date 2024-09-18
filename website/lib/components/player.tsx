@@ -8,6 +8,7 @@ type PlayerInGameProps = {
     username: string;
     headUrl: string;
     score: number;
+    deathCount: number;
     team: "RED" | "BLUE";
   };
 };
@@ -26,7 +27,7 @@ export const PlayerInGame: Component<PlayerInGameProps> = ({ player }) => {
           <Badge variant={player.team === "RED" ? "RED" : "BLUE"}>{player.team}</Badge>
         </h5>
         <p className="text-sm text-muted-foreground">
-          {player.score} points
+          {player.score} points | {player.deathCount} deaths
         </p>
       </div>
     </div>

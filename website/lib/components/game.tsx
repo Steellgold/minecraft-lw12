@@ -13,7 +13,7 @@ type Player = {
   username: string;
   headUrl: string;
   score: number;
-  deaths: number;
+  deathCount: number;
   team: "RED" | "BLUE";
 };
 
@@ -70,7 +70,7 @@ export const GameComponent: Component<GameComponentProps> = ({ game }) => {
                     return {
                       ...player,
                       score: updatedPlayer.score,
-                      deaths: updatedPlayer.deathCount,
+                      deathCount: updatedPlayer.deathCount,
                     };
                   }
                   return player;
