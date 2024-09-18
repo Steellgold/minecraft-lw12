@@ -5,6 +5,7 @@ import { z } from "zod";
 
 const playerSchema = z.object({
   name: z.string().min(1, "Name is required"),
+  uuid: z.string().uuid(),
   head: z.string().min(1, "Head image is required (base64)")
 });
 
@@ -21,7 +22,7 @@ export const POST = async (req: NextRequest): Promise<NextResponse> => {
       return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
     }
 
-    const { name, head } = schema.data;
+    const { name, head, uuid } = schema.data;
 
     const existingPlayer = await prisma.player.findUnique({
       where: { name }
@@ -34,6 +35,8 @@ export const POST = async (req: NextRequest): Promise<NextResponse> => {
     const newPlayer = await prisma.player.create({
       data: {
         name,
+        uuid,
+        isOnline: true,
         head: Buffer.from(head, "base64")
       }
     });
