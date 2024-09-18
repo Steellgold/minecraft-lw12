@@ -5,7 +5,7 @@ import { prisma } from "@/lib/db/prisma";
 const gameSchema = z.object({
   players: z.array(z.object({
     uuid: z.string().uuid(),
-    team: z.enum(["RED", "BLUE"])
+    team: z.enum(["RED", "BLUE", "YELLOW", "GREEN", "PURPLE", "ORANGE", "PINK", "WHITE"])
   }))
 });
 

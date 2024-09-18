@@ -43,6 +43,12 @@ model Game {
 enum Team {
   RED
   BLUE
+  YELLOW
+  GREEN
+  PURPLE
+  ORANGE
+  PINK
+  WHITE
 }
 
 model Score {
