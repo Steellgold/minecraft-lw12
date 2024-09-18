@@ -27,6 +27,11 @@ export const POST = async (req: NextRequest): Promise<NextResponse> => {
     const existingPlayer = await prisma.player.findUnique({ where: { name } });
 
     if (existingPlayer) {
+      await prisma.player.update({
+        where: { name },
+        data: { isOnline: true }
+      });
+
       return NextResponse.json({ error: "Player with this name already exists" }, { status: 409 });
     }
 

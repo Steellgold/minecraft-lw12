@@ -19,8 +19,6 @@ export const PUT = async({ url, headers }: NextRequest): Promise<NextResponse> =
   if (!data) return NextResponse.json({ error: "Player not found" }, { status: 404 });
   if (!data.data) return NextResponse.json({ error: "Player not found" }, { status: 404 });
 
-  const online = data.data[0].isOnline;
-  
-  await prisma.$executeRaw`UPDATE "Player" SET "isOnline" = ${!online} WHERE "uuid" = ${data.data[0].uuid}`; // Idk why with Supabase have a "No content"
-  return NextResponse.json({ isOnline: !online });
+  await prisma.$executeRaw`UPDATE "Player" SET "isOnline" = false WHERE "uuid" = ${data.data[0].uuid}`; // Idk why with Supabase have a "No content"
+  return NextResponse.json({ isOnline: false });
 }
