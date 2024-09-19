@@ -52,17 +52,20 @@ export const PUT = async (req: NextRequest): Promise<NextResponse> => {
     return NextResponse.json({ error: "Invalid API key" }, { status: 401 });
   }
 
-  const body = await req.json();
+  const schema = z.object({
+    gameId: z.string(),
+    playerUuid: z.string().uuid(),
+    score: z.number(),
+    deathCount: z.number()
+  }).safeParse(await req.json());
 
-  const { gameId, playerUuid, score, deathCount } = body;
-
-  if (!gameId || !playerUuid || !score || !deathCount) {
+  if (!schema.success) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
   const game = await prisma.game.findUnique({
     where: {
-      id: gameId
+      id: schema.data.gameId
     },
     include: {
       scores: true
@@ -73,7 +76,7 @@ export const PUT = async (req: NextRequest): Promise<NextResponse> => {
     return NextResponse.json({ error: "Game not found" }, { status: 404 });
   }
 
-  const scoreToUpdate = game.scores.find((s) => s.playerUuid === playerUuid);
+  const scoreToUpdate = game.scores.find((s) => s.playerUuid === schema.data.playerUuid);
 
   if (!scoreToUpdate) {
     return NextResponse.json({ error: "Player not found in game" }, { status: 404 });
@@ -84,8 +87,8 @@ export const PUT = async (req: NextRequest): Promise<NextResponse> => {
       id: scoreToUpdate.id
     },
     data: {
-      deathCount,
-      score
+      deathCount: schema.data.deathCount,
+      score: schema.data.score
     }
   });
   
@@ -98,12 +101,9 @@ export const PATCH = async (req: NextRequest): Promise<NextResponse> => {
     return NextResponse.json({ error: "Invalid API key" }, { status: 401 });
   }
 
-  const schema = z.object({
-    gameId: z.string().uuid()
-  }).safeParse(await req.json());
+  const schema = z.object({ gameId: z.string() }).safeParse(await req.json());
 
   if (!schema.success) {
-    console.log(schema.error);
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
