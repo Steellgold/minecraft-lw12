@@ -103,6 +103,7 @@ export const PATCH = async (req: NextRequest): Promise<NextResponse> => {
   }).safeParse(await req.json());
 
   if (!schema.success) {
+    console.log(schema.error);
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 

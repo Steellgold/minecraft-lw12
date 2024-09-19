@@ -7,6 +7,9 @@ import { PlayerInGame } from "./player";
 import { RealtimeChannel } from "@supabase/supabase-js";
 import { cn } from "../utils";
 import { Component } from "../component/component";
+import { Team } from "@prisma/client";
+import { Bar, BarChart, CartesianGrid, XAxis } from "recharts"
+import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/lib/components/ui/chart"
 
 type Player = {
   uuid: string;
@@ -14,7 +17,7 @@ type Player = {
   headUrl: string;
   score: number;
   deathCount: number;
-  team: "RED" | "BLUE";
+  team: Team;
 };
 
 type GameData = {
@@ -61,7 +64,6 @@ export const GameComponent: Component<GameComponentProps> = ({ game }) => {
             filter: `gameId=eq.${gameData.gameId}`,
           },
           (payload) => {
-            // Handle score updates
             if (payload.eventType === "UPDATE" || payload.eventType === "INSERT") {
               const updatedPlayer = payload.new;
               setGameData((prev) => {
@@ -120,12 +122,54 @@ export const GameComponent: Component<GameComponentProps> = ({ game }) => {
     }
   }, [gameData.status]);
 
-  const totalPlayers = gameData.players.length;
-  const maxScore = totalPlayers === 2 ? 20 : totalPlayers * 20;
-  const redScore = gameData.players.filter((p) => p.team === "RED").reduce((sum, p) => sum + p.score, 0);
-  const blueScore = gameData.players.filter((p) => p.team === "BLUE").reduce((sum, p) => sum + p.score, 0);
-  const redPercentage = (redScore / maxScore) * 100;
-  const bluePercentage = (blueScore / maxScore) * 100;
+  const teamScores = gameData.players.reduce((acc, player) => {
+    if (!acc[player.team]) {
+      acc[player.team] = 0;
+    }
+    acc[player.team] += player.score;
+    return acc;
+  }, {} as Record<string, number>);
+
+  const chartConfig = {
+    RED: {
+      color: "#FF4444",
+      label: "Red Team",
+    },
+    BLUE: {
+      color: "#4444FF",
+      label: "Blue Team",
+    },
+    YELLOW: {
+      color: "#FFD744",
+      label: "Yellow Team",
+    },
+    GREEN: {
+      color: "#008444",
+      label: "Green Team",
+    },
+    PURPLE: {
+      color: "#844484",
+      label: "Purple Team",
+    },
+    ORANGE: {
+      color: "#FFA544",
+      label: "Orange Team",
+    },
+    PINK: {
+      color: "#FFC4CB",
+      label: "Pink Team",
+    },
+    WHITE: {
+      color: "#FFFFFF",
+      label: "White Team",
+    }
+  } satisfies ChartConfig;
+
+  const chartData = Object.keys(teamScores).map((team) => ({
+    team,
+    score: teamScores[team],
+    fill: chartConfig[team as keyof typeof chartConfig].color,
+  }));
 
   return (
     <div key={gameData.gameId} className={cn("border rounded-md p-4", {
@@ -159,24 +203,42 @@ export const GameComponent: Component<GameComponentProps> = ({ game }) => {
 
       {gameData.status === "STARTED" && (
         <div className="mt-4">
-          <div className="w-full h-4 bg-gray-200 rounded-full overflow-hidden flex">
-            <div
-              className="bg-red-500 h-full"
-              style={{ width: `${redPercentage}%` }}
-            />
-            <div
-              className="bg-blue-500 h-full"
-              style={{ width: `${bluePercentage}%` }}
-            />
-          </div>
-          <div className="flex justify-between mt-2 text-sm">
-            <span className="text-red-500">Red: {redScore}</span>
-            
+          <ChartContainer config={chartConfig}>
+            <BarChart
+              accessibilityLayer
+              data={chartData}
+              margin={{
+                top: 20,
+              }}
+            >
+              <CartesianGrid vertical={false} />
+
+              <XAxis
+                dataKey="team"
+                tickLine={false}
+                tickMargin={10}
+                axisLine={false}
+                tickFormatter={(value) => chartConfig[value as keyof typeof chartConfig].label}
+              />
+
+              <ChartTooltip
+                cursor={false}
+                content={<ChartTooltipContent hideLabel />}
+              />
+              
+              <Bar
+                dataKey="score"
+                radius={8}
+                label={{ position: "top" }}
+              />
+            </BarChart>
+          </ChartContainer>
+
+          <div className="flex justify-between mt-2 text-xs">
             <span className="text-muted-foreground">
+              Time elapsed:&nbsp;
               {elapsedTime}
             </span>
-
-            <span className="text-blue-500">Blue: {blueScore}</span>
           </div>
         </div>
       )}

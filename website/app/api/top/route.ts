@@ -24,8 +24,14 @@ export const GET = async (): Promise<NextResponse> => {
       };
     }));
 
-    // 3. Retourner les données formatées
-    return NextResponse.json(playersData);
+    const sortedPlayers = playersData.sort((a, b) => {
+      if (b.totalScore === a.totalScore) {
+        return a.totalDeaths - b.totalDeaths;
+      }
+      return b.totalScore - a.totalScore;
+    });
+
+    return NextResponse.json(sortedPlayers);
   } catch (error) {
     console.error("Error fetching players:", error);
     return NextResponse.json({ error: "Failed to fetch players" }, { status: 500 });

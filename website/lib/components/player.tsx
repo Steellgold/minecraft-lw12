@@ -1,3 +1,4 @@
+import { Team } from "@prisma/client";
 import { Component } from "../component/component";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Badge } from "./ui/badge";
@@ -9,7 +10,7 @@ type PlayerInGameProps = {
     headUrl: string;
     score: number;
     deathCount: number;
-    team: "RED" | "BLUE";
+    team: Team;
   };
 };
 
@@ -24,7 +25,10 @@ export const PlayerInGame: Component<PlayerInGameProps> = ({ player }) => {
       <div className="flex flex-col">
         <h5 className="text-lg font-semibold text-foreground flex items-center gap-1">
           {player.username}
-          <Badge variant={player.team === "RED" ? "RED" : "BLUE"}>{player.team}</Badge>
+          {/* @ts-expect-error Don't have time to fix this */}
+          <Badge variant={player.team.toUpperCase()}>
+            {player.team.toUpperCase()}
+          </Badge>
         </h5>
         <p className="text-sm text-muted-foreground">
           {player.score} points | {player.deathCount} deaths

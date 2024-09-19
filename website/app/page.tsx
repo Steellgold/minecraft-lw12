@@ -1,7 +1,7 @@
 "use client";
 
 import { OnlineCount } from "@/lib/components/online-count";
-import { Button, buttonVariants } from "@/lib/components/ui/button";
+import { Button } from "@/lib/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader } from "@/lib/components/ui/card";
 import { Input } from "@/lib/components/ui/input";
 import { ReactElement, useEffect, useState } from "react";
@@ -10,10 +10,10 @@ import { LoaderCircle } from "lucide-react";
 import { useFormState, useFormStatus } from "react-dom";
 import { Alert, AlertDescription, AlertTitle } from "@/lib/components/ui/alert";
 import { PlayerProfile } from "@/lib/components/profile";
-import Link from "next/link";
-import { Badge } from "@/lib/components/ui/badge";
-import { CopyButton } from "@/lib/components/copy-button";
 import Image from "next/image";
+import { Team } from "@prisma/client";
+import { JoinCard } from "@/lib/components/join-card";
+import { Leaderboard } from "@/lib/components/top-players";
 
 const initialState = {
   username: "",
@@ -49,7 +49,7 @@ export type GState = {
       headUrl: string;
       score: number;
       deathCount: number;
-      team: "RED" | "BLUE";
+      team: Team;
     }[];
   }[];
 };
@@ -77,58 +77,49 @@ const Home = () => {
     <div className="flex flex-col items-center justify-center mt-8">
       <Image src="/sized-title.png" width={350} height={100} alt="Supabase" className="mb-4" />
 
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardDescription>
-            Get the player statistics of the laser-games server
-          </CardDescription>
-        </CardHeader>
-        <form action={formAction}>
-          <CardContent className="grid gap-4 -mb-3">
-            <Input
-              type="text"
-              placeholder="Username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
-          </CardContent>
+      <div className="flex-col sm:grid sm:grid-cols-2 sm:gap-4 max-w-3xl space-y-4 sm:space-y-0">
+        <div>
+          <Card className="w-full max-w-sm">
+            <CardHeader>
+              <CardDescription>
+                Get the player statistics of the laser-games server
+              </CardDescription>
+            </CardHeader>
+            <form action={formAction}>
+              <CardContent className="grid gap-4 -mb-3">
+                <Input
+                  type="text"
+                  placeholder="Username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                />
+              </CardContent>
 
-          <CardFooter className="flex flex-col gap-4">
-            <SearchButton />
+              <CardFooter className="flex flex-col gap-4">
+                <SearchButton />
 
-            {state.error && (
-              <Alert variant={state.error ? "destructive" : "default"}>
-                <AlertTitle>{state.error}</AlertTitle>
-                <AlertDescription>
-                  {state.error === "Player not found" && "The player you are looking for does not exist."}
-                  {state.error === "Failed to fetch" && "An error occurred while fetching the player."}
-                </AlertDescription>
-              </Alert>
-            )}
-          </CardFooter>
-        </form>
+                {state.error && (
+                  <Alert variant={state.error ? "destructive" : "default"}>
+                    <AlertTitle>{state.error}</AlertTitle>
+                    <AlertDescription>
+                      {state.error === "Player not found" && "The player you are looking for does not exist."}
+                      {state.error === "Failed to fetch" && "An error occurred while fetching the player."}
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </CardFooter>
+            </form>
 
-        <CardFooter className="-mt-4">
-          <OnlineCount />
-        </CardFooter>
-      </Card>
+            <CardFooter className="-mt-4">
+              <OnlineCount />
+            </CardFooter>
+          </Card>
+          
+          <JoinCard />
+        </div>
 
-      <Card className="w-full max-w-sm mt-4">
-        <CardHeader>
-          <CardDescription>
-            How to play? Join the server with the button below, or connect with the IP&nbsp;
-            <Badge>supabase.mcbe.fr<CopyButton text="supabase.mcbe.fr" /></Badge>&nbsp;
-            on Minecraft (Bedrock Edition).
-          </CardDescription>
-        </CardHeader>
-        <CardFooter>
-          <Link
-            href="minecraft:?addExternalServer=Supabase|supabase.mcbe.fr:19132" 
-            className={buttonVariants({ variant: "default" })}>
-            Launch Minecraft
-          </Link>
-        </CardFooter>
-      </Card>
+        <Leaderboard />
+      </div>
     </div>
   );
 };
