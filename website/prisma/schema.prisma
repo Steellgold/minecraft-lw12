@@ -54,7 +54,7 @@ enum Team {
 model Score {
   id     String @id @default(cuid())
   player Player @relation(fields: [playerUuid], references: [uuid])
-  game   Game   @relation(fields: [gameId], references: [id])
+  game   Game   @relation(fields: [gameId], references: [id], onDelete: Cascade)
 
   score      Int
   deathCount Int
