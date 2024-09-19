@@ -98,17 +98,16 @@ export const PATCH = async (req: NextRequest): Promise<NextResponse> => {
     return NextResponse.json({ error: "Invalid API key" }, { status: 401 });
   }
 
-  const body = await req.json();
-  const { gameId } = body;
+  const schema = z.object({
+    gameId: z.string().uuid()
+  }).safeParse(await req.json());
 
-  if (!gameId) {
+  if (!schema.success) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
   const game = await prisma.game.update({
-    where: {
-      id: gameId
-    },
+    where: { id: schema.data.gameId },
     data: {
       status: "FINISHED"
     }
