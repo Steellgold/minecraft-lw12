@@ -6,6 +6,8 @@ use hackaton\game\Game;
 use hackaton\Loader;
 use hackaton\manager\GameManager;
 use hackaton\player\scoreboard\Scoreboard;
+use hackaton\task\async\PutAsyncTask;
+use JsonException;
 use pocketmine\entity\Location;
 use pocketmine\entity\Skin;
 use pocketmine\nbt\tag\CompoundTag;
@@ -77,14 +79,22 @@ class GAPlayer extends Player {
     }
 
     /**
+     * @return void
+     */
+    public function quitServer(): void {
+        new PutAsyncTask("/" . $this->getName() . "/status", [], fn() => null);
+    }
+
+    /**
      * @param Config $config
      * @return void
+     * @throws JsonException
      */
     public function joinGame(Config $config): void {
         $games = GameManager::getInstance()->getGames();
 
         $selectedGames = array_filter($games, function ($game) use ($config) {
-            return $game->getId() === (string)$config->get("id") && $game->isJoinable();
+            return $game->getConfigId() === (string)$config->get("id") && $game->isJoinable();
         });
 
         $game = array_values($selectedGames)[0] ?? null;

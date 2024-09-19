@@ -91,10 +91,11 @@ class Team {
     }
 
     /**
-     * @param PlayerSession $session
+     * @param PlayerSession|null $session
      * @return bool
      */
-    public function removeSession(PlayerSession $session): bool {
+    public function removeSession(?PlayerSession $session): bool {
+        if (is_null($session)) return false;
         $uuid = $session->getPlayer()->getUniqueId()->toString();
         $session = $this->sessions[$uuid] ?? null;
 

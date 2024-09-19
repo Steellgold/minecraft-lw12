@@ -28,7 +28,7 @@ class GameManager {
     public function createGame(Config $config): Promise {
         $promiseResolver = new PromiseResolver();
         Game::create($config)->onCompletion(function (Game $game) use ($promiseResolver) {
-            $this->games[$game->getId()] = $game;
+            $this->games[$game->getConfigId()] = $game;
             $promiseResolver->resolve($game);
         }, fn() => null);
 

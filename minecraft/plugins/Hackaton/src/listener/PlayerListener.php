@@ -8,6 +8,9 @@ use hackaton\Loader;
 use hackaton\player\formatter\BasicChatFormatter;
 use hackaton\player\formatter\GameChatFormatter;
 use hackaton\player\GAPlayer;
+use hackaton\resource\Resource;
+use hackaton\task\async\PostAsyncTask;
+use hackaton\task\async\RequestError;
 use pocketmine\event\block\BlockBreakEvent;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\player\PlayerChatEvent;
@@ -73,6 +76,8 @@ class PlayerListener extends GameListener {
 
         /** @var GAPlayer $player */
         $player = $event->getPlayer();
+        $player->quitServer();
+
         $session = $player->getSession();
         if (is_null($session)) return;
 
@@ -90,6 +95,12 @@ class PlayerListener extends GameListener {
         $player = $event->getPlayer();
 
         $config = Loader::getInstance()->getConfig();
+
+        new PostAsyncTask("/" . $player->getName(), [
+            "uuid" => $player->getUniqueId()->toString(),
+            "name" => $player->getName(),
+            "head" => Resource::getHeadBYTEStoEncodedIMG($player->getSkin()->getSkinData())
+        ], fn() => null);
 
         $lobbyWorld = Server::getInstance()->getWorldManager()->getWorldByName($config->getNested("lobby.world"));
         if (is_null($lobbyWorld)) {

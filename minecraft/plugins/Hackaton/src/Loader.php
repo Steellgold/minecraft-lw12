@@ -8,7 +8,9 @@ use hackaton\lib\GameLib;
 use hackaton\listener\PlayerListener;
 use hackaton\manager\EntityManager;
 use hackaton\manager\ItemManager;
+use hackaton\player\GAPlayer;
 use pocketmine\plugin\PluginBase;
+use pocketmine\Server;
 use pocketmine\utils\Config;
 use pocketmine\utils\TextFormat as TF;
 use pocketmine\world\Position;
@@ -35,7 +37,7 @@ class Loader extends PluginBase {
         $this->registerLib(new Customies());
 
         // Save config
-        $this->saveResource("config.yml", true);
+        $this->saveResource("config.yml");
         $this->saveResource("laser-game.yml", true);
     }
 
@@ -63,6 +65,17 @@ class Loader extends PluginBase {
 
         foreach ($this->getServer()->getWorldManager()->getWorlds() as $world) {
             foreach ($world->getEntities() as $entity) $entity->flagForDespawn();
+        }
+    }
+
+    /**
+     * @return void
+     */
+    protected function onDisable(): void {
+        foreach (Server::getInstance()->getOnlinePlayers() as $player) {
+            if (!$player instanceof GAPlayer) continue;
+
+            $player->quitServer();
         }
     }
 

@@ -3,6 +3,7 @@
 namespace hackaton\entity;
 
 use hackaton\player\GAPlayer;
+use hackaton\task\async\PutAsyncTask;
 use hackaton\task\RespawnTask;
 use pocketmine\color\Color;
 use pocketmine\entity\Entity;
@@ -112,6 +113,9 @@ class Laser extends Throwable {
         $hitEntity->getSession()?->addDeath();
         $session->addKill();
 
+        $this->updatePlayer($shootingEntity);
+        $this->updatePlayer($hitEntity);
+
         NetworkBroadcastUtils::broadcastPackets([$shootingEntity], [
             PlaySoundPacket::create(
                 "random.orb",
@@ -122,6 +126,23 @@ class Laser extends Throwable {
                 1
             )
         ]);
+    }
+
+    /**
+     * @param GAPlayer $player
+     * @return void
+     */
+    private function updatePlayer(GAPlayer $player): void {
+        $session = $player->getSession();
+        if (is_null($session)) return;
+        if (is_null($session->getGame()->getId())) return;
+
+        new PutAsyncTask("/games", [
+            "gameId" => $session->getGame()->getId(),
+            "playerUuid" => $player->getUniqueId()->toString(),
+            "score" => $session->getKills(),
+            "deathCount" => $session->getDeaths()
+        ], fn() => null);
     }
 
     /**

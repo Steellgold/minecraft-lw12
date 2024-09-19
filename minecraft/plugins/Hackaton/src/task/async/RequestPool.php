@@ -58,15 +58,16 @@ class RequestPool {
 
     /**
      * @param string $id
+     * @param mixed $data
      * @return void
      */
-    public static function execute(string $id): void {
+    public static function execute(string $id, mixed $data): void {
         $callback = self::get($id);
         if ($callback === null) {
             return;
         }
 
-        $callback();
+        $callback($data);
         self::remove($id);
     }
 }

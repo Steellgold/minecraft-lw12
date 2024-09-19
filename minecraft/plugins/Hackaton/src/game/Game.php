@@ -7,8 +7,12 @@ use hackaton\player\GAPlayer;
 use hackaton\player\PlayerSession;
 use hackaton\resource\Resource;
 use hackaton\task\async\CopyWorldAsync;
+use hackaton\task\async\PatchAsyncTask;
+use hackaton\task\async\PostAsyncTask;
+use hackaton\task\async\RequestError;
 use hackaton\task\WaitingGameTask;
 use JsonException;
+use MongoDB\Driver\Session;
 use pocketmine\block\VanillaBlocks;
 use pocketmine\entity\Skin;
 use pocketmine\player\GameMode;
@@ -43,8 +47,11 @@ class Game {
     /** @var bool */
     private bool $finish = false;
 
+    /** @var null|string */
+    private ?string $id = null;
+
     /**
-     * @param string $id
+     * @param string $configId
      * @param string $prefix
      * @param string $description
      * @param int $minPlayers
@@ -55,7 +62,7 @@ class Game {
      * @param World $world
      */
     public function __construct(
-        private readonly string $id,
+        private readonly string $configId,
         private readonly string $prefix,
         private readonly string $description,
         private readonly int    $minPlayers,
@@ -99,7 +106,6 @@ class Game {
                 Server::getInstance()->getWorldManager()->getWorldByName($worldName)
             ));
         });
-
         return $promiseResolver->getPromise();
     }
 
@@ -125,10 +131,17 @@ class Game {
     }
 
     /**
+     * @return string|null
+     */
+    public function getId(): ?string {
+        return $this->id;
+    }
+
+    /**
      * @return string
      */
-    public function getId(): string {
-        return $this->id;
+    public function getConfigId(): string {
+        return $this->configId;
     }
 
     /**
@@ -382,6 +395,31 @@ class Game {
      * @return void
      */
     public function start(): void {
+        $players = [];
+        foreach ($this->teams as $team) {
+            foreach ($team->getSessions() as $session) {
+                $player = $session->getPlayer();
+                if (is_null($player)) continue;
+
+                $players[] = [
+                    "uuid" => $session->getUuid()->toString(),
+                    "team" => strtoupper($team->getName())
+                ];
+            }
+        }
+
+        new PostAsyncTask(
+            "/games",
+            [
+                "players" => $players
+            ],
+            function ($res) {
+                if ($res instanceof RequestError) return;
+
+                $this->id = $res["id"];
+            }
+        );
+
         foreach ($this->getSpawnPoints() as $spawnPoint) {
             $this->getWorld()->setBlock($spawnPoint->add(0, -1, 0), VanillaBlocks::AIR());
         }
@@ -401,6 +439,8 @@ class Game {
      * @return void
      */
     public function finish(): void {
+        new PatchAsyncTask("/games", ["gameId" => $this->getId()], fn() => null);
+
         foreach ($this->teams as $team) {
             foreach ($team->getSessions() as $session) {
                 $player = $session->getPlayer();
