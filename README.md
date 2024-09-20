@@ -28,6 +28,7 @@ To run this project, you will need to add the following environment variables to
 | `DIRECT_URL`                | Direct connection string to your database (often used for migrations) |
 | `SUPER_SECRET_API_MEGA_KEY` | An API key to secure the routes can edit data |
 | `URL`                       | The base URL for your application |
+
 ## Tech Stack
 
 **Web:**
@@ -36,3 +37,8 @@ To run this project, you will need to add the following environment variables to
   - **Fullstack tools**: [Zod](https://zod.dev/), [TypeScript](https://www.typescriptlang.org/)
 
 **Minecraft Server**: PocketMine-MP (Software) and PHP 8.1
+
+## Videos
+
+https://github.com/user-attachments/assets/882c95fd-dcdf-4ae9-9062-07d45ed2e6b3
+

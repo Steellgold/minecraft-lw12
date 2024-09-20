@@ -51,6 +51,13 @@ export type GState = {
       deathCount: number;
       team: Team;
     }[];
+    actions: {
+      id: number;
+      gameId: string;
+      victimUuid: string;
+      killerUuid: string;
+      startedAt: string; // lmao, "startedAt" must be createdAt
+    }[];
   }[];
 };
 
@@ -70,7 +77,10 @@ const Home = () => {
   }, [state]);
 
   if (state.username && !reset) {
-    return <PlayerProfile state={state} onBack={() => setReset(true)} />;
+    return <PlayerProfile
+      state={state}
+      onBack={() => setReset(true)}
+    />;
   }
 
   return (
