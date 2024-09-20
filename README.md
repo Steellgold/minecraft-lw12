@@ -40,5 +40,7 @@ To run this project, you will need to add the following environment variables to
 
 ## Videos
 
+[Demo video on YT](https://www.youtube.com/watch?v=AMxJu8juYzs)
+
 https://github.com/user-attachments/assets/882c95fd-dcdf-4ae9-9062-07d45ed2e6b3
 
