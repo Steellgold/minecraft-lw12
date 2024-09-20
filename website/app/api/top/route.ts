@@ -33,7 +33,6 @@ export const GET = async (): Promise<NextResponse> => {
 
     return NextResponse.json(sortedPlayers);
   } catch (error) {
-    console.error("Error fetching players:", error);
     return NextResponse.json({ error: "Failed to fetch players" }, { status: 500 });
   }
 };

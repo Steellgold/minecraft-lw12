@@ -61,41 +61,9 @@ export const GameComponent: Component<GameComponentProps> = ({ game, onlyActive 
             filter: `id=eq.${gameData.gameId}`,
           },
           (payload) => {
+            console.log("game updated");
             if (payload.eventType === "UPDATE") {
               setGameData((prev) => ({ ...prev, ...payload.new }));
-            }
-          }
-        )
-        .on(
-          "postgres_changes",
-          {
-            event: "*",
-            schema: "public",
-            table: "Action",
-            filter: `gameId=eq.${gameData.gameId}`,
-          },
-          (payload) => {
-            if (payload.eventType === "INSERT") {
-              // @ts-ignore
-              setGameData((prev) => {
-                const newAction = payload.new;
-                const victimPlayer = prev.players.find((player) => player.uuid === newAction.victimUuid);
-                const killerPlayer = prev.players.find((player) => player.uuid === newAction.killerUuid);
-
-                if (victimPlayer) {
-                  victimPlayer.deathCount += 1;
-                }
-
-                if (killerPlayer) {
-                  killerPlayer.score += 1;
-                }
-
-                return {
-                  ...prev,
-                  players: [...prev.players],
-                  actions: [...prev.actions, newAction],
-                };
-              });
             }
           }
         )
@@ -108,6 +76,7 @@ export const GameComponent: Component<GameComponentProps> = ({ game, onlyActive 
             filter: `gameId=eq.${gameData.gameId}`,
           },
           (payload) => {
+            console.log("score updated");
             if (payload.eventType === "UPDATE" || payload.eventType === "INSERT") {
               const updatedPlayer = payload.new;
               setGameData((prev) => {
@@ -124,6 +93,26 @@ export const GameComponent: Component<GameComponentProps> = ({ game, onlyActive 
                 return {
                   ...prev,
                   players: updatedPlayers,
+                };
+              });
+            }
+          }
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "Action",
+            filter: `gameId=eq.${gameData.gameId}`,
+          },
+          (payload) => {
+            if (payload.eventType === "INSERT") {
+              // @ts-ignore
+              setGameData((prev) => {
+                return {
+                  ...prev,
+                  actions: [...prev.actions, payload.new],
                 };
               });
             }

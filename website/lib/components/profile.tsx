@@ -19,9 +19,7 @@ type Props = {
 
 export const PlayerProfile: Component<Props> = ({ onBack, state }) => {
   const media = useMediaQuery('(min-width: 768px)');
-
-  const activeGame = state.games.find((game) => game.status === "STARTED");
-  const hasActiveGame = activeGame !== undefined;
+  const hasActiveGame = state.games.some((game) => game.status === "STARTED");
 
   return (
     <div className="flex flex-col items-center justify-center mt-8">

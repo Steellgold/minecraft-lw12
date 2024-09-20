@@ -31,7 +31,7 @@ export const PlayerInGame: Component<PlayerInGameProps> = ({ player }) => {
           </Badge>
         </h5>
         <p className="text-sm text-muted-foreground">
-          {player.score} points | {player.deathCount} deaths
+          {player.score} points | {player.deathCount ?? 0} deaths
         </p>
       </div>
     </div>

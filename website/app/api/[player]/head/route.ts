@@ -7,14 +7,11 @@ export const GET = async({ url }: NextRequest): Promise<NextResponse> => {
   const schema = z.string().safeParse(playerName);
   if (!schema.success) return NextResponse.json({ error: "Invalid player" }, { status: 400 });
 
-  // const data = await prisma.$queryRaw<Player[]>`SELECT * FROM "Player" WHERE name = ${playerName} OR uuid = ${playerName} LIMIT 1`;
-  // if (!data) return NextResponse.json({ error: "Player not found" }, { status: 404 });
   const data = await supabase.from("Player")
     .select("*")
     .eq("name", playerName)
     .limit(1);
 
-  console.log(data);
   if (!data) return NextResponse.json({ error: "Player not found" }, { status: 404 });
   if (!data.data) return NextResponse.json({ error: "Player not found" }, { status: 404 });
 

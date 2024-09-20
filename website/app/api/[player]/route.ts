@@ -56,13 +56,11 @@ export const POST = async (req: NextRequest): Promise<NextResponse> => {
     });
 
     if (uploadError) {
-      console.error("Error uploading head image:", uploadError);
       return NextResponse.json({ error: "Failed to upload head image" }, { status: 500 });
     }
 
     return NextResponse.json(newPlayer);
   } catch (error) {
-    console.error("Error creating player:", error);
     return NextResponse.json({ error: "Failed to create player" }, { status: 500 });
   }
 };

@@ -18,7 +18,6 @@ export const POST = async (req: NextRequest): Promise<NextResponse> => {
   const body = await req.json();
   const schema = gameSchema.safeParse(body);
   if (!schema.success) {
-    console.log(schema.error);
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
