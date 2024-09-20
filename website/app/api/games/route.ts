@@ -110,6 +110,7 @@ export const PATCH = async (req: NextRequest): Promise<NextResponse> => {
   const game = await prisma.game.update({
     where: { id: schema.data.gameId },
     data: {
+      finishedAt: new Date(),
       status: "FINISHED"
     }
   });
