@@ -445,6 +445,7 @@ class Game {
             foreach ($team->getSessions() as $session) {
                 $player = $session->getPlayer();
                 if (is_null($player)) continue;
+                $team->removeSession($session);
 
                 $player->setSession(null);
                 $player->getScoreboard()->remove();
