@@ -20,20 +20,31 @@ type Player = {
   team: Team;
 };
 
+type Action = {
+  id: number;
+  gameId: string;
+  victimUuid: string;
+  killerUuid: string;
+  startedAt: string; // lmao, "startedAt" must be createdAt
+};
+
 type GameData = {
   gameId: string;
   simpleId: number;
   startedAt: string;
   status: "STARTED" | "FINISHED";
   players: Player[];
+  actions: Action[];
 };
 
 type GameComponentProps = {
   game: GameData;
+  onlyActive?: boolean;
 };
 
-export const GameComponent: Component<GameComponentProps> = ({ game }) => {
+export const GameComponent: Component<GameComponentProps> = ({ game, onlyActive }) => {
   const [gameData, setGameData] = useState(game);
+
   const channelRef = useRef<RealtimeChannel | null>(null);
   const [elapsedTime, setElapsedTime] = useState("");
 
@@ -52,6 +63,39 @@ export const GameComponent: Component<GameComponentProps> = ({ game }) => {
           (payload) => {
             if (payload.eventType === "UPDATE") {
               setGameData((prev) => ({ ...prev, ...payload.new }));
+            }
+          }
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "Action",
+            filter: `gameId=eq.${gameData.gameId}`,
+          },
+          (payload) => {
+            if (payload.eventType === "INSERT") {
+              // @ts-ignore
+              setGameData((prev) => {
+                const newAction = payload.new;
+                const victimPlayer = prev.players.find((player) => player.uuid === newAction.victimUuid);
+                const killerPlayer = prev.players.find((player) => player.uuid === newAction.killerUuid);
+
+                if (victimPlayer) {
+                  victimPlayer.deathCount += 1;
+                }
+
+                if (killerPlayer) {
+                  killerPlayer.score += 1;
+                }
+
+                return {
+                  ...prev,
+                  players: [...prev.players],
+                  actions: [...prev.actions, newAction],
+                };
+              });
             }
           }
         )
@@ -171,6 +215,10 @@ export const GameComponent: Component<GameComponentProps> = ({ game }) => {
     fill: chartConfig[team as keyof typeof chartConfig].color,
   }));
 
+  if (onlyActive && gameData.status === "FINISHED") {
+    return <p className="text-muted-foreground">This player is not in any active game</p>;
+  }
+
   return (
     <div key={gameData.gameId} className={cn("border rounded-md p-4", {
       "border-primary": gameData.status === "STARTED",
@@ -242,6 +290,23 @@ export const GameComponent: Component<GameComponentProps> = ({ game }) => {
           </div>
         </div>
       )}
+
+      <div>
+        {gameData.actions.map((action) => (
+          <div key={action.id} className="flex items-center justify-between mt-2">
+            <div className="flex flex-row items-center gap-2">
+              <p className="text-sm text-muted-foreground">
+                {dayJS(action.startedAt).format("HH:mm:ss")}
+              </p>
+              <p className="text-sm text-foreground">
+                🔫&nbsp;
+                <strong>{gameData.players.find((player) => player.uuid === action.victimUuid)?.username}</strong> killed by&nbsp;
+                <strong>{gameData.players.find((player) => player.uuid === action.killerUuid)?.username}</strong>
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

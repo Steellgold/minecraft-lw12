@@ -7,8 +7,6 @@ import dayOfYear from "dayjs/plugin/dayOfYear";
 import weekOfYear from "dayjs/plugin/weekOfYear";
 import isBetween from "dayjs/plugin/isBetween";
 
-require("dayjs/locale/en");
-
 dayjs.extend(duration);
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -16,9 +14,6 @@ dayjs.extend(objectSupport);
 dayjs.extend(dayOfYear);
 dayjs.extend(weekOfYear);
 dayjs.extend(isBetween);
-
-dayjs.tz.setDefault("UTC");
-dayjs.locale("en");
 
 export const dayJS = dayjs;
 export { Dayjs } from "dayjs";

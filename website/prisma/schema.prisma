@@ -38,6 +38,19 @@ model Game {
 
   players Player[]
   scores  Score[]
+  actions Action[]
+}
+
+model Action {
+  id String @id @default(cuid())
+
+  startedAt DateTime @default(now())
+
+  killerUuid String
+  victimUuid String
+
+  game   Game   @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  gameId String
 }
 
 enum Team {

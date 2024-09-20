@@ -20,7 +20,11 @@ export const Leaderboard = () => {
   useEffect(() => {
     const fetchPlayers = async () => {
       try {
-        const response = await fetch("/api/top");
+        const response = await fetch("/api/top", {
+          headers: {
+            "Cache-Control": "no-cache"
+          }
+        });
         const data = await response.json();
         const sortedPlayers = data.sort((a: Player, b: Player) => b.totalScore - a.totalScore);
         setPlayers(sortedPlayers);

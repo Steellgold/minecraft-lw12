@@ -72,6 +72,38 @@ export type Database = {
         }
         Relationships: []
       }
+      Action: {
+        Row: {
+          gameId: string
+          id: string
+          killerUuid: string
+          startedAt: string
+          victimUuid: string
+        }
+        Insert: {
+          gameId: string
+          id: string
+          killerUuid: string
+          startedAt?: string
+          victimUuid: string
+        }
+        Update: {
+          gameId?: string
+          id?: string
+          killerUuid?: string
+          startedAt?: string
+          victimUuid?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "Action_gameId_fkey"
+            columns: ["gameId"]
+            isOneToOne: false
+            referencedRelation: "Game"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       Game: {
         Row: {
           finishedAt: string | null
@@ -168,7 +200,15 @@ export type Database = {
     }
     Enums: {
       GameStatus: "STARTED" | "FINISHED"
-      Team: "RED" | "BLUE"
+      Team:
+        | "RED"
+        | "BLUE"
+        | "YELLOW"
+        | "GREEN"
+        | "PURPLE"
+        | "ORANGE"
+        | "PINK"
+        | "WHITE"
     }
     CompositeTypes: {
       [_ in never]: never

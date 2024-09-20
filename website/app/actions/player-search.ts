@@ -54,6 +54,13 @@ export const searchAction = async (username: string) => {
 
       if (gameScoresError || !gameScoresData || gameScoresData.length === 0) return { error: "No scores found" };
 
+      const { data: gameActionsData, error: gameActionsError } = await supabase
+        .from("Action")
+        .select("*")
+        .eq("gameId", game.A);
+      
+      if (gameActionsError || !gameActionsData || gameActionsData.length === 0) return { error: "No actions found" };
+
       const players = await Promise.all(
         gamePlayersData.map(async (player) => {
           const { data: playerInfo, error: playerInfoError } = await supabase
@@ -88,6 +95,7 @@ export const searchAction = async (username: string) => {
         startedAt: gameData.startedAt,
         status: gameData.status,
         players,
+        actions: gameActionsData,
       };
     })
   );
