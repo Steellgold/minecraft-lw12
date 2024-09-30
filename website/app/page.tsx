@@ -14,6 +14,7 @@ import Image from "next/image";
 import { Team } from "@prisma/client";
 import { JoinCard } from "@/lib/components/join-card";
 import { Leaderboard } from "@/lib/components/top-players";
+import { Avatar, AvatarImage } from "@/lib/components/ui/avatar";
 
 const initialState = {
   username: "",
@@ -88,7 +89,7 @@ const Home = () => {
       <Image src="/sized-title.png" width={350} height={100} alt="Supabase" className="mb-4" />
 
       <div className="flex-col sm:grid sm:grid-cols-2 sm:gap-4 max-w-3xl space-y-4 sm:space-y-0">
-        <div>
+        <div className="gap-5">
           <Card className="w-full max-w-sm">
             <CardHeader>
               <CardDescription>
@@ -126,6 +127,21 @@ const Home = () => {
           </Card>
           
           <JoinCard />
+
+          <Card className="w-full max-w-sm mt-4">
+            <CardHeader>
+              <CardDescription className="flex items-center gap-2">
+                <Avatar className="w-5 h-5">
+                  <AvatarImage src="https://pbs.twimg.com/profile_images/1822981431586439168/7xkKXRGQ_400x400.jpg" alt="Supabase" />
+                </Avatar>
+                Supabase Hackathon
+              </CardDescription>
+            </CardHeader>
+
+            <CardContent>
+              We won the #1 spot on the {"\""}Most fun / best easter egg{"\""} category of the hackathon! 🎉
+            </CardContent>
+          </Card>
         </div>
 
         <Leaderboard />
